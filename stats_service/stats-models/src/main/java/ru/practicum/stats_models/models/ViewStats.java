@@ -17,5 +17,4 @@ public class ViewStats {
     private String uri;
 
     private Long hits;
-
 }
