@@ -24,7 +24,7 @@ public class StatsClient {
             .requestFactory(HttpComponentsClientHttpRequestFactory::new)
             .build();
 
-    protected  <T> ResponseEntity<Object> post(String path, T body) {
+    public  <T> ResponseEntity<Object> post(String path, T body) {
         URI uri = UriComponentsBuilder.fromUriString(server + path).build().toUri();
         return makeAndSendRequest(HttpMethod.POST, uri, body);
     }
