@@ -4,7 +4,6 @@ import org.springframework.data.domain.Pageable;
 import ru.practicum.main_service.events.dto.*;
 import ru.practicum.main_service.events.enums.EventState;
 import ru.practicum.main_service.events.enums.TypesForSort;
-import ru.practicum.main_service.events.models.Event;
 import ru.practicum.main_service.request.dto.ParticipationRequestDto;
 
 import javax.servlet.http.HttpServletRequest;

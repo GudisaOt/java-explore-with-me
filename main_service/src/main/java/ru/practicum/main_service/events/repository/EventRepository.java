@@ -1,17 +1,13 @@
 package ru.practicum.main_service.events.repository;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-import ru.practicum.main_service.events.enums.EventState;
 import ru.practicum.main_service.events.models.Event;
 
 import java.util.List;
 
 @Repository
-public interface EventRepository extends JpaRepository<Event, Long>, CustomRepository{
+public interface EventRepository extends JpaRepository<Event, Long>, CustomRepository {
     List<Event> findAllByInitiatorId(Long userId);
 
 //    @Query("SELECT e FROM events AS e " +

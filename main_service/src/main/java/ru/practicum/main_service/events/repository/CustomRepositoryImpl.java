@@ -12,7 +12,7 @@ import javax.persistence.criteria.Root;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class CustomRepositoryImpl implements CustomRepository{
+public class CustomRepositoryImpl implements CustomRepository {
     @PersistenceContext
     private EntityManager entityManager;
 

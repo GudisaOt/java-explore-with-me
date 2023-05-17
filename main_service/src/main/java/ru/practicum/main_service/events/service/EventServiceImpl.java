@@ -31,7 +31,7 @@ import static ru.practicum.main_service.events.enums.EventState.PUBLISHED;
 
 @Service
 @RequiredArgsConstructor
-public class EventServiceImpl implements EventService{
+public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final EventMapper eventMapper;
     private final LocationRepository locationRepository;
@@ -234,7 +234,7 @@ public class EventServiceImpl implements EventService{
     }
 
     private void dateValidator(LocalDateTime evDate) {
-        if (evDate.isBefore(LocalDateTime.now().plusHours(2))){
+        if (evDate.isBefore(LocalDateTime.now().plusHours(2))) {
             throw new BadRequestException("Остлалось менее двух часов до события!");
         }
     }
@@ -242,7 +242,7 @@ public class EventServiceImpl implements EventService{
     private Location getLocationToEvent(LocationDto locationDto) {
         Location location = locationMapper.toLocation(locationDto);
         Optional<Location> locationOptional = locationRepository.findByLatAndAndLon(locationDto.getLat(), locationDto.getLon());
-        if(locationOptional.isPresent()){
+        if(locationOptional.isPresent()) {
             return locationOptional.get();
         }
         return locationRepository.save(location);
