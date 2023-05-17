@@ -242,7 +242,7 @@ public class EventServiceImpl implements EventService {
     private Location getLocationToEvent(LocationDto locationDto) {
         Location location = locationMapper.toLocation(locationDto);
         Optional<Location> locationOptional = locationRepository.findByLatAndAndLon(locationDto.getLat(), locationDto.getLon());
-        if(locationOptional.isPresent()) {
+        if (locationOptional.isPresent()) {
             return locationOptional.get();
         }
         return locationRepository.save(location);
