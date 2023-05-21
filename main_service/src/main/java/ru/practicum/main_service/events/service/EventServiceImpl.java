@@ -64,7 +64,7 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new NotFoundException("User not found!"));
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found!"));
-        if (event.getInitiator().getId() != eventOwner.getId()) {
+        if (event.getInitiator().getId().equals(eventOwner.getId())) {
             throw new BadRequestException("You are not initiator!");
         }
         if (event.getState().equals(PUBLISHED)) {
@@ -186,7 +186,7 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new NotFoundException("User not found!"));
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found!"));
-        if (event.getInitiator().getId() != userId) {
+        if (event.getInitiator().getId().equals(user.getId())) {
             throw new BadRequestException("You are not initiator!");
         }
 

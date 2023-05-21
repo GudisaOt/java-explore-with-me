@@ -74,7 +74,7 @@ public class RequestServiceImpl implements RequestService {
                 .orElseThrow(() -> new NotFoundException("User not found!!!"));
         Request request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new NotFoundException("Request not found!"));
-        if (request.getRequester().getId() != userId) {
+        if (request.getRequester().getId().equals(userId)) {
             throw new BadRequestException("User is not requester!");
         }
         request.setStatus(RequestStatus.CANCELED);
