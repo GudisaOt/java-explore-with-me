@@ -1,21 +1,29 @@
 package ru.practicum.stats_client;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.lang.Nullable;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+import ru.practicum.stats_models.models.EndpointHit;
 
 import java.net.URI;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+@Component
+@RequiredArgsConstructor
 public class StatsClient {
     private String server = "http://localhost:9090";
 
@@ -24,7 +32,7 @@ public class StatsClient {
             .requestFactory(HttpComponentsClientHttpRequestFactory::new)
             .build();
 
-    public  <T> ResponseEntity<Object> post(String path, T body) {
+    protected  <T> ResponseEntity<Object> post(String path, T body) {
         URI uri = UriComponentsBuilder.fromUriString(server + path).build().toUri();
         return makeAndSendRequest(HttpMethod.POST, uri, body);
     }
@@ -64,6 +72,14 @@ public class StatsClient {
             return responseBuilder.body(response.getBody());
         }
         return responseBuilder.build();
+    }
+    public void catchHit(String requestURI, String remoteAddr) {
+        String path = "/hit";
+        EndpointHit endpointHit = new EndpointHit(
+                "ewm-service", requestURI, remoteAddr,
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        HttpEntity<Object> requestEntity = new HttpEntity<>(endpointHit, defaultHeaders());
+        rest.exchange(path, HttpMethod.POST, requestEntity, Object.class);
     }
 
     private HttpHeaders defaultHeaders() {

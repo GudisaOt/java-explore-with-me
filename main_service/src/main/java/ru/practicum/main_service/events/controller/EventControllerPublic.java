@@ -1,6 +1,7 @@
 package ru.practicum.main_service.events.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/events")
+@Slf4j
 public class EventControllerPublic {
     private final EventService eventService;
 
@@ -33,6 +35,7 @@ public class EventControllerPublic {
             @PositiveOrZero @RequestParam(required = false, defaultValue = "0") Integer from,
             @Positive @RequestParam(required = false, defaultValue = "10") Integer size,
             HttpServletRequest request) {
+        log.info("Public CONTROLLER get events");
         return ResponseEntity.ok(eventService.getEventsForPublic(text, categories, paid, rangeStart, rangeEnd, onlyAvailable,
                 sort, from, size, request));
     }
@@ -40,6 +43,7 @@ public class EventControllerPublic {
     @GetMapping("/{id}")
     public ResponseEntity<EventFullDto> getEventByPublic(@PathVariable Long id,
                                                          HttpServletRequest request) {
-        return ResponseEntity.ok(eventService.getEventForPublic(id));
+        log.info("ublic CONTROLLER get event list");
+        return ResponseEntity.ok(eventService.getEventForPublic(id, request));
     }
 }

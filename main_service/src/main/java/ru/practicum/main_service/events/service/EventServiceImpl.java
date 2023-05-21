@@ -1,6 +1,7 @@
 package ru.practicum.main_service.events.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,7 @@ import ru.practicum.main_service.request.dto.ParticipationRequestDto;
 import ru.practicum.main_service.user.model.User;
 import ru.practicum.main_service.user.repository.UserRepository;
 
+
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -31,6 +33,7 @@ import static ru.practicum.main_service.events.enums.EventState.PUBLISHED;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final EventMapper eventMapper;
@@ -38,14 +41,13 @@ public class EventServiceImpl implements EventService {
     private final LocationMapper locationMapper;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
-   // private final StatsService statsService;
-
+   // private final StatsClient statsClient;
 
     @Override
     @Transactional
     public EventFullDto create(Long userId, NewEventDto newEventDto) {
         dateValidator(newEventDto.getEventDate());
-
+        log.info("creating event");
         User eventOwner = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found!"));
         Category category = categoryRepository.findById(newEventDto.getCategory())
@@ -57,6 +59,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto update(Long userId, Long eventId, UpdateEventUserRequest updateEventUserRequest) {
+        log.info("upd by user");
         User eventOwner = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found!"));
         Event event = eventRepository.findById(eventId)
@@ -101,6 +104,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto adminUpdate(Long eventId, UpdateEventAdminRequest updateEventAdminRequest) {
+        log.info("upd by admin");
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found!"));
 
@@ -156,6 +160,7 @@ public class EventServiceImpl implements EventService {
 //                        : event.getEventDate().isBefore(LocalDateTime.MAX))
 //                .map(eventMapper::toEventFullDto)
 //                .collect(Collectors.toList());
+        log.info("get event list by admin");
         List<EventFullDto> events = eventRepository.getEventsByAdmin(users, states, categories, rangeStart, rangeEnd, from, size)
                 .stream()
                 .map(eventMapper::toEventFullDto)
@@ -165,6 +170,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventShortDto> getAllByUser(Long userId, Pageable pageable) {
+        log.info("get event list by user");
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found!"));
         return eventRepository.findAllByInitiatorId(userId)
@@ -175,6 +181,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto getFullEventByUser(Long userId, Long eventId) {
+        log.info("get event by user");
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found!"));
         Event event = eventRepository.findById(eventId)
@@ -192,16 +199,18 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventFullDto getEventForPublic(Long eventId) {
+    public EventFullDto getEventForPublic(Long eventId, HttpServletRequest request) {
+        log.info("get event for public");
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found!"));
+        //statsClient.catchHit(request.getRequestURI(), request.getRemoteAddr());
         return eventMapper.toEventFullDto(event);
     }
 
     @Override
     public List<EventShortDto> getEventsForPublic(String text, List<Long> categories, Boolean paid, LocalDateTime rangeStart, LocalDateTime rangeEnd,
                                                   Boolean onlyAvailable, TypesForSort sort, Integer from, Integer size, HttpServletRequest request) {
-
+        log.info("get event LIST for public");
         List<Event> events = eventRepository.getEventsByPublic(text, categories, paid, rangeStart, rangeEnd, from, size);
 
         if (events.isEmpty()) {
@@ -230,6 +239,7 @@ public class EventServiceImpl implements EventService {
                 eventsShortDto.sort(Comparator.comparing(EventShortDto::getEventDate));
             }
         }
+       // statsClient.catchHit(request.getRequestURI(), request.getRemoteAddr());
         return eventsShortDto;
     }
 

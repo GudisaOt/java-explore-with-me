@@ -1,6 +1,7 @@
 package ru.practicum.main_service.events.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/admin/events")
+@Slf4j
 public class EventControllerAdmin {
     private final EventService eventService;
 
@@ -29,12 +31,14 @@ public class EventControllerAdmin {
                                                         @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
                                                         @PositiveOrZero @RequestParam (required = false, defaultValue = "0")  Integer from,
                                                         @Positive @RequestParam(required = false, defaultValue = "10") Integer size) {
+        log.info("ADMIN  CONTROLLER EVENTS");
         return ResponseEntity.ok(eventService.getEventsByAdmin(users, states, categories, rangeStart, rangeEnd, from, size));
     }
 
     @PatchMapping("/{eventId}")
     public ResponseEntity<EventFullDto> patchEvent(@PathVariable Long eventId,
                                                    @Valid @RequestBody UpdateEventAdminRequest updateEventAdminRequest) {
+        log.info("ADMIN  CONTROLLER patch");
         return ResponseEntity.ok(eventService.adminUpdate(eventId, updateEventAdminRequest));
     }
 }

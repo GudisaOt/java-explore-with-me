@@ -12,7 +12,6 @@ import javax.validation.constraints.NotBlank;
 @NoArgsConstructor
 @Builder
 public class EndpointHit {
-    private int id;
     @NotBlank
     private String app;
     @NotBlank

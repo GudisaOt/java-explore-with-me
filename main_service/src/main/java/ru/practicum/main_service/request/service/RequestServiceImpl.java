@@ -1,6 +1,7 @@
 package ru.practicum.main_service.request.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.main_service.events.enums.EventState;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RequestServiceImpl implements RequestService {
 
     private final RequestRepository requestRepository;
@@ -36,6 +38,7 @@ public class RequestServiceImpl implements RequestService {
     @Override
     @Transactional
     public ParticipationRequestDto create(Long userId, Long evId) {
+        log.info("create request");
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found!!!"));
         Event event = eventRepository.findById(evId)
@@ -66,6 +69,7 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public ParticipationRequestDto cancel(Long requestId, Long userId) {
+        log.info("CANCEL REQUEST");
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found!!!"));
         Request request = requestRepository.findById(requestId)
@@ -79,6 +83,7 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public List<ParticipationRequestDto> getAll(Long userId) {
+        log.info("get all REQWUEST");
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found!!!"));
         List<ParticipationRequestDto> list = requestRepository.findAllByRequesterId(userId)
