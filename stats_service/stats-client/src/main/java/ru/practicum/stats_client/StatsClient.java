@@ -72,15 +72,6 @@ public class StatsClient {
         }
         return responseBuilder.build();
     }
-    
-    public void catchHit(String requestURI, String remoteAddr) {
-        String path = "/hit";
-        EndpointHit endpointHit = new EndpointHit(
-                "ewm-service", requestURI, remoteAddr,
-                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        HttpEntity<Object> requestEntity = new HttpEntity<>(endpointHit, defaultHeaders());
-        rest.exchange(path, HttpMethod.POST, requestEntity, Object.class);
-    }
 
     private HttpHeaders defaultHeaders() {
         HttpHeaders headers = new HttpHeaders();
