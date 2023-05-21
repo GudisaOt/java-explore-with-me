@@ -7,8 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.main_service.events.enums.EventStateAction;
 
-import javax.validation.Valid;
-import javax.validation.constraints.PositiveOrZero;
 
 import java.time.LocalDateTime;
 
