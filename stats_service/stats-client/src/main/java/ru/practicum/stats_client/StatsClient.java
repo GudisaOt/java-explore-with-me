@@ -6,7 +6,6 @@ import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
@@ -73,6 +72,7 @@ public class StatsClient {
         }
         return responseBuilder.build();
     }
+    
     public void catchHit(String requestURI, String remoteAddr) {
         String path = "/hit";
         EndpointHit endpointHit = new EndpointHit(
