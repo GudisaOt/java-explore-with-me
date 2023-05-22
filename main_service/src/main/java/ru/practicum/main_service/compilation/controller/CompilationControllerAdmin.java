@@ -1,6 +1,7 @@
 package ru.practicum.main_service.compilation.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.main_service.compilation.dto.CompilationDto;
@@ -17,8 +18,9 @@ public class CompilationControllerAdmin {
     private final CompilationService compilationService;
 
     @PostMapping
-    public ResponseEntity<CompilationDto> create(@Valid @RequestBody NewCompilationDto newCompilationDto) {
-        return ResponseEntity.ok(compilationService.create(newCompilationDto));
+    @ResponseStatus(HttpStatus.CREATED)
+    public CompilationDto create(@Valid @RequestBody NewCompilationDto newCompilationDto) {
+        return compilationService.create(newCompilationDto);
     }
 
     @PatchMapping("/{compId}")
@@ -30,6 +32,6 @@ public class CompilationControllerAdmin {
     @DeleteMapping("/{compId}")
     public ResponseEntity<Void> deleteById(@PathVariable Long compId) {
         compilationService.deleteById(compId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }

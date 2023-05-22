@@ -1,6 +1,7 @@
 package ru.practicum.main_service.events.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import ru.practicum.main_service.events.models.Event;
 
@@ -9,6 +10,13 @@ import java.util.List;
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long>, CustomRepository {
     List<Event> findAllByInitiatorId(Long userId);
+
+//    @Query(value =
+//                    "SELECT * " +
+//                    "FROM events AS e " +
+//                    "WHERE e.category_id = ?1 " +
+//                    "LIMIT 1", nativeQuery = true)
+//    Event findFirstByCategory(Long catId);
 
 //    @Query("SELECT e FROM events AS e " +
 //            "WHERE ((:users) IS NULL OR e.user.id IN :users) " +

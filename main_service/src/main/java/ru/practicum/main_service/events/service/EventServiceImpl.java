@@ -18,8 +18,15 @@ import ru.practicum.main_service.events.models.Location;
 import ru.practicum.main_service.events.repository.EventRepository;
 import ru.practicum.main_service.events.repository.LocationRepository;
 import ru.practicum.main_service.exceptions.BadRequestException;
+import ru.practicum.main_service.exceptions.ConflictException;
 import ru.practicum.main_service.exceptions.NotFoundException;
+import ru.practicum.main_service.request.dto.EventRequestStatusUpdateRequest;
+import ru.practicum.main_service.request.dto.EventRequestStatusUpdateResult;
 import ru.practicum.main_service.request.dto.ParticipationRequestDto;
+import ru.practicum.main_service.request.enums.RequestStatus;
+import ru.practicum.main_service.request.mapper.RequestMapper;
+import ru.practicum.main_service.request.model.Request;
+import ru.practicum.main_service.request.repository.RequestRepository;
 import ru.practicum.main_service.user.model.User;
 import ru.practicum.main_service.user.repository.UserRepository;
 
@@ -29,7 +36,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static ru.practicum.main_service.events.enums.EventState.PUBLISHED;
+import static ru.practicum.main_service.events.enums.EventState.*;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +49,8 @@ public class EventServiceImpl implements EventService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
    // private final StatsClient statsClient;
+    private final RequestRepository requestRepository;
+    private final RequestMapper requestMapper;
 
     @Override
     @Transactional
@@ -64,13 +73,15 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new NotFoundException("User not found!"));
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found!"));
-        if (event.getInitiator().getId().equals(eventOwner.getId())) {
+        if (!event.getInitiator().getId().equals(eventOwner.getId())) {
             throw new BadRequestException("You are not initiator!");
         }
         if (event.getState().equals(PUBLISHED)) {
-            throw new BadRequestException("You cant upd published event");
+            throw new ConflictException("You cant upd published event");
         }
-        dateValidator(updateEventUserRequest.getEventDate());
+        if (updateEventUserRequest.getEventDate() != null) {
+            dateValidator(updateEventUserRequest.getEventDate());
+        }
 
         Optional.ofNullable(updateEventUserRequest.getAnnotation()).ifPresent(event::setAnnotation);
 
@@ -86,7 +97,7 @@ public class EventServiceImpl implements EventService {
 
         Optional.ofNullable(updateEventUserRequest.getTitle()).ifPresent(event::setTitle);
 
-        if (updateEventUserRequest.getCategory() > 0) {
+        if (updateEventUserRequest.getCategory() != null) {
             Category category = categoryRepository.findById(updateEventUserRequest.getCategory())
                     .orElseThrow(() -> new NotFoundException("Category not found"));
             event.setCategory(category);
@@ -108,12 +119,13 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found!"));
 
-        dateValidator(updateEventAdminRequest.getEventDate());
+        if (updateEventAdminRequest.getEventDate() != null) {
+            dateValidator(updateEventAdminRequest.getEventDate());
+        }
 
         if (event.getState().equals(PUBLISHED)) {
-            throw new BadRequestException("You cant upd published event");
+            throw new ConflictException("You cant upd published event");
         }
-        dateValidator(updateEventAdminRequest.getEventDate());
 
         Optional.ofNullable(updateEventAdminRequest.getAnnotation()).ifPresent(event::setAnnotation);
 
@@ -129,7 +141,7 @@ public class EventServiceImpl implements EventService {
 
         Optional.ofNullable(updateEventAdminRequest.getTitle()).ifPresent(event::setTitle);
 
-        if (updateEventAdminRequest.getCategory() > 0) {
+        if (updateEventAdminRequest.getCategory() != null) {
             Category category = categoryRepository.findById(updateEventAdminRequest.getCategory())
                     .orElseThrow(() -> new NotFoundException("Category not found"));
             event.setCategory(category);
@@ -138,8 +150,10 @@ public class EventServiceImpl implements EventService {
             Location location = getLocationToEvent(updateEventAdminRequest.getLocation());
             event.setLocation(location);
         }
-        if (updateEventAdminRequest.getStateAction() != null) {
+        if (updateEventAdminRequest.getStateAction() != null && event.getState().equals(PENDING)) {
             event.setState(toEventStateForUpd(updateEventAdminRequest.getStateAction()));
+        } else {
+            throw new ConflictException("Event has been canceled");
         }
         return eventMapper.toEventFullDto(eventRepository.save(event));
     }
@@ -186,16 +200,11 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new NotFoundException("User not found!"));
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found!"));
-        if (event.getInitiator().getId().equals(user.getId())) {
+        if (!event.getInitiator().getId().equals(user.getId())) {
             throw new BadRequestException("You are not initiator!");
         }
 
         return eventMapper.toEventFullDto(event);
-    }
-
-    @Override
-    public List<ParticipationRequestDto> getRequests(Long userId, Long eventId) {
-        return null;
     }
 
     @Override
@@ -243,9 +252,57 @@ public class EventServiceImpl implements EventService {
         return eventsShortDto;
     }
 
+    @Override
+    public List<ParticipationRequestDto> getRequestsOnEventPrivate(Long userId, Long eventId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found!"));
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event not found!"));
+        if (!event.getInitiator().getId().equals(userId)) {
+            throw new BadRequestException("You are not initiator!");
+        }
+
+        return requestRepository.findAllByEventId(eventId)
+                .stream()
+                .map(requestMapper::toPartReqDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public EventRequestStatusUpdateResult patchEventRequestPrivate(Long userId, Long eventId, EventRequestStatusUpdateRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found!"));
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event not found!"));
+        List<Request> requestsList = requestRepository.findAllByIdInAndStatus(request.getRequestIds(), RequestStatus.PENDING);
+        if (requestsList.isEmpty()) {
+            throw new ConflictException("Request list is empty");
+        }
+
+//        if (!event.getInitiator().getId().equals(userId)) {
+//            throw new BadRequestException("You are not initiator!");
+//        }
+//        if (event.getParticipantLimit() == 0 || event.getParticipantLimit() == event.getConfirmedRequests()) {
+//            throw new BadRequestException("Limit equals 0 or full");
+//        }
+//        EventRequestStatusUpdateResult result = new EventRequestStatusUpdateResult();
+//        List<Request> requestsList = requestRepository.findAllByIdInAndStatus(request.getRequestIds(), RequestStatus.PENDING);
+//
+//        if (request.getStatus().equals(RequestStatus.REJECTED)) {
+//            rejectedList.addAll(changeStatusInList(requestsList, RequestStatus.REJECTED));
+//        }
+//
+//        if (request.getStatus().equals(RequestStatus.CONFIRMED)) {
+//            long space = event.getParticipantLimit() - event.getConfirmedRequests();
+//            long count = 0L;
+//        }
+        return prepare(requestsList, request.getStatus(), event);
+    }
+
     private void dateValidator(LocalDateTime evDate) {
         if (evDate.isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new BadRequestException("Остлалось менее двух часов до события!");
+            throw new ConflictException("Остлалось менее двух часов до события!");
         }
     }
 
@@ -256,6 +313,11 @@ public class EventServiceImpl implements EventService {
             return locationOptional.get();
         }
         return locationRepository.save(location);
+    }
+
+    private List<Request> changeStatusInList(List<Request> requests, RequestStatus status) {
+        requests.forEach(request -> request.setStatus(status));
+        return requestRepository.saveAll(requests);
     }
 
     private EventState toEventStateForUpd(EventStateAction eventStateAction) {
@@ -270,5 +332,56 @@ public class EventServiceImpl implements EventService {
                 return EventState.PENDING;
         }
         return null;
+    }
+
+    private EventRequestStatusUpdateResult prepare(List<Request> requests, RequestStatus status, Event event) {
+        switch (status) {
+            case CONFIRMED:
+                List<Request> confirmedRequests = new ArrayList<>();
+                List<Request> rejectedRequests = new ArrayList<>();
+                for (Request request : requests) {
+                    if (event.getConfirmedRequests() == null) {
+                        event.setConfirmedRequests(0L);
+                    }
+                    if (event.getConfirmedRequests() < event.getParticipantLimit()) {
+                        request.setStatus(RequestStatus.CONFIRMED);
+                        confirmedRequests.add(request);
+                        event.setConfirmedRequests(event.getConfirmedRequests() + 1);
+                    } else {
+                        request.setStatus(RequestStatus.REJECTED);
+                        rejectedRequests.add(request);
+                    }
+                }
+                if (!rejectedRequests.isEmpty()) {
+                    throw new ConflictException("Error");
+                }
+                eventRepository.flush();
+                requestRepository.flush();
+
+                List<ParticipationRequestDto> confirmedRequestsDto = confirmedRequests.stream()
+                        .map(requestMapper::toPartReqDto)
+                        .collect(Collectors.toList());
+                return new EventRequestStatusUpdateResult(confirmedRequestsDto, Collections.emptyList());
+            case REJECTED:
+
+                for (Request request : requests) {
+                    Optional<Request> requestOptional = requestRepository.findById(request.getId());
+                    if (requestOptional.isPresent()) {
+                        if (requestOptional.get().getStatus().equals(RequestStatus.CONFIRMED)) {
+                            throw new ConflictException("You cant reject canceled request");
+                        }
+                    }
+                    request.setStatus(RequestStatus.REJECTED);
+                }
+                requestRepository.flush();
+
+                List<ParticipationRequestDto> rejected = requests.stream()
+                        .map(requestMapper::toPartReqDto)
+                        .collect(Collectors.toList());
+
+                return new EventRequestStatusUpdateResult(Collections.emptyList(), rejected);
+            default:
+                throw new ConflictException("Conflict error");
+        }
     }
 }

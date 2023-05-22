@@ -19,4 +19,6 @@ public interface CategoryService {
     CategoryDto update(Long id, CategoryDto categoryDto);
 
     List<CategoryDto> getAll(Pageable pageable);
+
+
 }

@@ -3,6 +3,7 @@ package ru.practicum.main_service.compilation.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.main_service.compilation.dto.CompilationDto;
 import ru.practicum.main_service.compilation.dto.NewCompilationDto;
 import ru.practicum.main_service.compilation.dto.UpdateCompilationRequest;
@@ -13,7 +14,6 @@ import ru.practicum.main_service.events.dto.EventShortDto;
 import ru.practicum.main_service.events.mapper.EventMapper;
 import ru.practicum.main_service.events.models.Event;
 import ru.practicum.main_service.events.repository.EventRepository;
-import ru.practicum.main_service.exceptions.BadRequestException;
 import ru.practicum.main_service.exceptions.NotFoundException;
 
 import java.util.List;
@@ -29,10 +29,8 @@ public class CompilationServiceImpl implements CompilationService {
     private final EventMapper eventMapper;
 
     @Override
+    @Transactional
     public CompilationDto create(NewCompilationDto newCompilationDto) {
-        if (newCompilationDto.getEvents().isEmpty()) {
-            throw new BadRequestException("Empty events list!");
-        }
         List<Event> events = eventRepository.findAllById(newCompilationDto.getEvents());
 
         Compilation compilation = compilationRepository.save(compilationMapper.newDtoToCompilation(newCompilationDto, events));
@@ -41,6 +39,7 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
+    @Transactional
     public CompilationDto patch(Long compId, UpdateCompilationRequest updateCompilationRequest) {
         Compilation compilation = compilationRepository.findById(compId)
                 .orElseThrow(() -> new NotFoundException("Not found!"));
@@ -78,6 +77,7 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
+    @Transactional
     public void deleteById(Long compId) {
         Compilation compilation = compilationRepository.findById(compId)
                 .orElseThrow(() -> new NotFoundException("Not found"));

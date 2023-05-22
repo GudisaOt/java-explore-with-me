@@ -9,6 +9,7 @@ import ru.practicum.main_service.category.dto.NewCategoryDto;
 import ru.practicum.main_service.category.mapper.CategoryMapper;
 import ru.practicum.main_service.category.model.Category;
 import ru.practicum.main_service.category.repository.CategoryRepository;
+import ru.practicum.main_service.exceptions.ConflictException;
 import ru.practicum.main_service.exceptions.NotFoundException;
 
 import java.util.List;
@@ -26,6 +27,9 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public CategoryDto create(NewCategoryDto newCategoryDto) {
+        if (categoryRepository.findFirstByName(newCategoryDto.getName()) != null) {
+            throw new ConflictException("Category already exist");
+        }
         return categoryMapper.categoryToCategoryDto(categoryRepository
                 .save(categoryMapper.newCatDtoToCategory(newCategoryDto)));
     }
@@ -43,6 +47,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
         categoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Category not found!!!"));
@@ -51,9 +56,14 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional
     public CategoryDto update(Long id, CategoryDto categoryDto) {
         Category catToUpd = categoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Category not found!!!"));
+
+        if (categoryRepository.findFirstByName(categoryDto.getName()) != null) {
+            throw new ConflictException("Category already exist");
+        }
 
         Optional.ofNullable(categoryDto.getName()).ifPresent(catToUpd::setName);
         return categoryMapper.categoryToCategoryDto(categoryRepository.save(catToUpd));

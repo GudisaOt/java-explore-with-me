@@ -8,6 +8,7 @@ import ru.practicum.main_service.events.enums.EventState;
 import ru.practicum.main_service.events.models.Event;
 import ru.practicum.main_service.events.repository.EventRepository;
 import ru.practicum.main_service.exceptions.BadRequestException;
+import ru.practicum.main_service.exceptions.ConflictException;
 import ru.practicum.main_service.exceptions.NotFoundException;
 import ru.practicum.main_service.request.dto.ParticipationRequestDto;
 import ru.practicum.main_service.request.enums.RequestStatus;
@@ -45,17 +46,18 @@ public class RequestServiceImpl implements RequestService {
                 .orElseThrow(() -> new NotFoundException("Event not found!!!"));
 
         if (event.getInitiator().getEmail().equals(user.getEmail())) {
-            throw new BadRequestException("Initiator cant create a request!");
+            throw new ConflictException("Initiator cant create a request!");
         }
         if (!event.getState().equals(EventState.PUBLISHED)) {
-            throw new BadRequestException("Event is not published");
+            throw new ConflictException("Event is not published");
         }
-        if (event.getParticipantLimit() != 0 || event.getConfirmedRequests() == event.getParticipantLimit()) {
-            throw new BadRequestException("Event is full");
+        if (event.getParticipantLimit() <= requestRepository
+                .countRequestsByEventIdAndStatus(evId, RequestStatus.CONFIRMED)) {
+            throw new ConflictException("Event is full");
         }
         Optional<Request> checkRepeat = requestRepository.findByRequesterIdAndEventId(userId, evId);
         if (checkRepeat.isPresent()) {
-            throw new BadRequestException("Request already exists");
+            throw new ConflictException("Request already exists");
         }
 
         Request request = Request.builder()
@@ -64,6 +66,9 @@ public class RequestServiceImpl implements RequestService {
                 .created(LocalDateTime.now())
                 .status((event.getRequestModeration()) ? RequestStatus.PENDING : RequestStatus.CONFIRMED)
                 .build();
+        if (!event.getRequestModeration()) {
+            event.setConfirmedRequests(event.getConfirmedRequests() + 1L);
+        }
         return requestMapper.toPartReqDto(requestRepository.save(request));
     }
 
@@ -74,7 +79,7 @@ public class RequestServiceImpl implements RequestService {
                 .orElseThrow(() -> new NotFoundException("User not found!!!"));
         Request request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new NotFoundException("Request not found!"));
-        if (request.getRequester().getId().equals(userId)) {
+        if (!request.getRequester().getId().equals(userId)) {
             throw new BadRequestException("User is not requester!");
         }
         request.setStatus(RequestStatus.CANCELED);

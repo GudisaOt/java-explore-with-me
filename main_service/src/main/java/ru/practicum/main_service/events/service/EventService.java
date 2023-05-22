@@ -4,6 +4,8 @@ import org.springframework.data.domain.Pageable;
 import ru.practicum.main_service.events.dto.*;
 import ru.practicum.main_service.events.enums.EventState;
 import ru.practicum.main_service.events.enums.TypesForSort;
+import ru.practicum.main_service.request.dto.EventRequestStatusUpdateRequest;
+import ru.practicum.main_service.request.dto.EventRequestStatusUpdateResult;
 import ru.practicum.main_service.request.dto.ParticipationRequestDto;
 
 import javax.servlet.http.HttpServletRequest;
@@ -26,11 +28,12 @@ public interface EventService {
 
     EventFullDto getFullEventByUser(Long userId, Long eventId);
 
-    List<ParticipationRequestDto> getRequests(Long userId, Long eventId);
-
     EventFullDto getEventForPublic(Long eventId, HttpServletRequest request);
 
     List<EventShortDto> getEventsForPublic(String text, List<Long> categories, Boolean paid, LocalDateTime rangeStart, LocalDateTime rangeEnd,
                                            Boolean onlyAvailable, TypesForSort sort, Integer from, Integer size, HttpServletRequest request);
 
+    List<ParticipationRequestDto> getRequestsOnEventPrivate(Long userId, Long eventId);
+
+    EventRequestStatusUpdateResult patchEventRequestPrivate(Long userId, Long eventId, EventRequestStatusUpdateRequest request);
 }

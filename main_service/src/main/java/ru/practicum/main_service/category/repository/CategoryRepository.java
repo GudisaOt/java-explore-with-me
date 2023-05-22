@@ -6,4 +6,5 @@ import ru.practicum.main_service.category.model.Category;
 
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Long> {
+    Category findFirstByName(String name);
 }

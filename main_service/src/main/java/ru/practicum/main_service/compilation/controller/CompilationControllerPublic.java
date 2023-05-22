@@ -23,7 +23,6 @@ public class CompilationControllerPublic {
     }
 
     @GetMapping
-
     public ResponseEntity<List<CompilationDto>> getAll(
             @RequestParam(required = false) Boolean pinned,
             @PositiveOrZero @RequestParam(required = false, defaultValue = "0") Integer from,

@@ -1,11 +1,13 @@
 package ru.practicum.main_service.request.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.main_service.request.dto.ParticipationRequestDto;
 import ru.practicum.main_service.request.service.RequestService;
 
+import javax.validation.constraints.Positive;
 import java.util.List;
 
 @RestController
@@ -20,8 +22,9 @@ public class RequestController {
     }
 
     @PostMapping
-    public ResponseEntity<ParticipationRequestDto> createRequest(@PathVariable Long userId, @RequestParam Long eventId) {
-        return ResponseEntity.ok(requestService.create(userId, eventId));
+    @ResponseStatus(HttpStatus.CREATED)
+    public ParticipationRequestDto createRequest(@PathVariable Long userId, @Positive @RequestParam Long eventId) {
+        return requestService.create(userId, eventId);
     }
 
     @PatchMapping("/{requestId}/cancel")
