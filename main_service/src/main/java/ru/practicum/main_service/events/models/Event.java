@@ -22,13 +22,13 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 120)
     private String title;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 2000)
     private String annotation;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 7000)
     private String description;
 
     @Column(nullable = false)
@@ -50,7 +50,7 @@ public class Event {
     @Column(nullable = false)
     private LocalDateTime eventDate;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
     private EventState state;
 
