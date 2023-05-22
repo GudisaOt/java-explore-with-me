@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.main_service.exceptions.ConflictException;
 import ru.practicum.main_service.exceptions.NotFoundException;
 import ru.practicum.main_service.user.dto.NewUserRequest;
 import ru.practicum.main_service.user.dto.UserDto;
@@ -25,6 +26,12 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDto createUser(NewUserRequest newUserRequest) {
+        if (newUserRequest.getName() != null) {
+            if (userRepository.findFirstByName(newUserRequest.getName()) != null) {
+                throw new ConflictException("Username already exist!!!");
+            }
+        }
+
         return userMapper.toUserDto(userRepository.save(userMapper.toUserFromReq(newUserRequest)));
     }
 

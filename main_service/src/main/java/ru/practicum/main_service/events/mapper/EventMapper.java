@@ -2,12 +2,12 @@ package ru.practicum.main_service.events.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import ru.practicum.main_service.events.enums.EventState;
 import ru.practicum.main_service.category.mapper.CategoryMapper;
 import ru.practicum.main_service.category.model.Category;
 import ru.practicum.main_service.events.dto.EventFullDto;
 import ru.practicum.main_service.events.dto.EventShortDto;
 import ru.practicum.main_service.events.dto.NewEventDto;
-import ru.practicum.main_service.events.enums.EventState;
 import ru.practicum.main_service.events.models.Event;
 import ru.practicum.main_service.events.models.Location;
 import ru.practicum.main_service.user.mapper.UserMapper;

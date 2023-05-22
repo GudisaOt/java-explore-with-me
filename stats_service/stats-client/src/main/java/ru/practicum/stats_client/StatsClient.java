@@ -1,5 +1,6 @@
 package ru.practicum.stats_client;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
@@ -11,20 +12,28 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+import ru.practicum.stats_models.EndpointHit;
+import ru.practicum.stats_models.ViewStats;
 
 import java.net.URI;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
 public class StatsClient {
     private String server = "http://localhost:9090";
 
+    private String serverUrl = "http://stats-server:9090";
+    private final String appName = "main-service";
+    private final ObjectMapper objectMapper;
+
+    private final String start = "1970-01-01 00:00:00";
+    private final String end = "2100-01-01 00:00:00";
+
     private final RestTemplate rest =  new RestTemplateBuilder()
-            .uriTemplateHandler(new DefaultUriBuilderFactory(server))
+            .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl))
             .requestFactory(HttpComponentsClientHttpRequestFactory::new)
             .build();
 
@@ -75,5 +84,39 @@ public class StatsClient {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         return headers;
+    }
+
+    public List<ViewStats> getStatsList(Set<String> uris) {
+        String path = "/stats?start={start}&end={end}&uris={uris}";
+
+        Map<String, Object> params = Map.of(
+                "start", start,
+                "end", end,
+                "uris", uris
+        );
+
+        return sendStatsRequest(path, params);
+    }
+
+    private List<ViewStats> sendStatsRequest(String path, Map<String, Object> parameters) {
+        ResponseEntity<Object[]> response = rest.getForEntity(path, Object[].class, parameters);
+        Object[] objects = response.getBody();
+        if (objects != null) {
+            return Arrays.stream(objects)
+                    .map(object -> objectMapper.convertValue(object, ViewStats.class))
+                    .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
+    }
+
+    public void catchHit(String uri, String ip) {
+        String path = "/hit";
+        EndpointHit hitDto = new EndpointHit();
+        hitDto.setApp(appName);
+        hitDto.setUri(uri);
+        hitDto.setIp(ip);
+        hitDto.setTimestamp(LocalDateTime.now().toString());
+        HttpEntity<Object> requestEntity = new HttpEntity<>(hitDto, defaultHeaders());
+        rest.exchange(path, HttpMethod.POST, requestEntity, Object.class);
     }
 }

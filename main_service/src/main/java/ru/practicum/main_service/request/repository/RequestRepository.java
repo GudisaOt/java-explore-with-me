@@ -2,8 +2,8 @@ package ru.practicum.main_service.request.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import ru.practicum.main_service.request.enums.RequestStatus;
 import ru.practicum.main_service.request.model.Request;
+import ru.practicum.main_service.request.enums.RequestStatus;
 
 import java.util.List;
 import java.util.Optional;

@@ -28,7 +28,7 @@ public class Event {
     @Column(nullable = false, length = 2000)
     private String annotation;
 
-    @Column(nullable = false, length = 7000)
+    @Column(nullable = false, length = 7001)
     private String description;
 
     @Column(nullable = false)

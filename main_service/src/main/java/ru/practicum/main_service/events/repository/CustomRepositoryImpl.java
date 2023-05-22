@@ -2,6 +2,8 @@ package ru.practicum.main_service.events.repository;
 
 import ru.practicum.main_service.events.enums.EventState;
 import ru.practicum.main_service.events.models.Event;
+import ru.practicum.main_service.events.enums.EventState;
+import ru.practicum.main_service.events.models.Event;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;

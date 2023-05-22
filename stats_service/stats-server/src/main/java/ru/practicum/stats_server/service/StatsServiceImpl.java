@@ -3,11 +3,12 @@ package ru.practicum.stats_server.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.stats_models.models.EndpointHit;
-import ru.practicum.stats_models.models.ViewStats;
+import ru.practicum.stats_models.EndpointHit;
+import ru.practicum.stats_models.ViewStats;
 import ru.practicum.stats_server.model.Stats;
 import ru.practicum.stats_server.model.StatsMapper;
 import ru.practicum.stats_server.repository.StatsRepository;
+
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -18,6 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StatsServiceImpl implements StatsService {
     private final StatsRepository statsRepository;
+
     private final StatsMapper statsMapper;
 
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");

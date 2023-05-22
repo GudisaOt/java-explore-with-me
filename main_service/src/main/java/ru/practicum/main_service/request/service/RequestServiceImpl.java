@@ -5,16 +5,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.main_service.events.enums.EventState;
+import ru.practicum.main_service.exceptions.BadRequestException;
 import ru.practicum.main_service.events.models.Event;
 import ru.practicum.main_service.events.repository.EventRepository;
-import ru.practicum.main_service.exceptions.BadRequestException;
 import ru.practicum.main_service.exceptions.ConflictException;
 import ru.practicum.main_service.exceptions.NotFoundException;
+import ru.practicum.main_service.request.model.Request;
+import ru.practicum.main_service.request.repository.RequestRepository;
 import ru.practicum.main_service.request.dto.ParticipationRequestDto;
 import ru.practicum.main_service.request.enums.RequestStatus;
 import ru.practicum.main_service.request.mapper.RequestMapper;
-import ru.practicum.main_service.request.model.Request;
-import ru.practicum.main_service.request.repository.RequestRepository;
 import ru.practicum.main_service.user.model.User;
 import ru.practicum.main_service.user.repository.UserRepository;
 
@@ -51,7 +51,7 @@ public class RequestServiceImpl implements RequestService {
         if (!event.getState().equals(EventState.PUBLISHED)) {
             throw new ConflictException("Event is not published");
         }
-        if (event.getParticipantLimit() <= requestRepository
+        if (event.getParticipantLimit() > 0 && event.getParticipantLimit() <= requestRepository
                 .countRequestsByEventIdAndStatus(evId, RequestStatus.CONFIRMED)) {
             throw new ConflictException("Event is full");
         }

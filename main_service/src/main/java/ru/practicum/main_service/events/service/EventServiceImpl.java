@@ -7,10 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.main_service.category.model.Category;
 import ru.practicum.main_service.category.repository.CategoryRepository;
-import ru.practicum.main_service.events.dto.*;
 import ru.practicum.main_service.events.enums.EventState;
 import ru.practicum.main_service.events.enums.EventStateAction;
-import ru.practicum.main_service.events.enums.TypesForSort;
 import ru.practicum.main_service.events.mapper.EventMapper;
 import ru.practicum.main_service.events.mapper.LocationMapper;
 import ru.practicum.main_service.events.models.Event;
@@ -19,14 +17,17 @@ import ru.practicum.main_service.events.repository.EventRepository;
 import ru.practicum.main_service.events.repository.LocationRepository;
 import ru.practicum.main_service.exceptions.BadRequestException;
 import ru.practicum.main_service.exceptions.ConflictException;
+import ru.practicum.main_service.events.enums.TypesForSort;
 import ru.practicum.main_service.exceptions.NotFoundException;
+import ru.practicum.stats_client.StatsClient;
+import ru.practicum.main_service.events.dto.*;
 import ru.practicum.main_service.request.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.main_service.request.dto.EventRequestStatusUpdateResult;
 import ru.practicum.main_service.request.dto.ParticipationRequestDto;
-import ru.practicum.main_service.request.enums.RequestStatus;
 import ru.practicum.main_service.request.mapper.RequestMapper;
 import ru.practicum.main_service.request.model.Request;
 import ru.practicum.main_service.request.repository.RequestRepository;
+import ru.practicum.main_service.request.enums.RequestStatus;
 import ru.practicum.main_service.user.model.User;
 import ru.practicum.main_service.user.repository.UserRepository;
 
@@ -35,8 +36,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static ru.practicum.main_service.events.enums.EventState.*;
 
 @Service
 @RequiredArgsConstructor
@@ -48,9 +47,10 @@ public class EventServiceImpl implements EventService {
     private final LocationMapper locationMapper;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
-   // private final StatsClient statsClient;
     private final RequestRepository requestRepository;
     private final RequestMapper requestMapper;
+
+    //private final StatsClient statsClient;
 
     @Override
     @Transactional
@@ -76,7 +76,7 @@ public class EventServiceImpl implements EventService {
         if (!event.getInitiator().getId().equals(eventOwner.getId())) {
             throw new BadRequestException("You are not initiator!");
         }
-        if (event.getState().equals(PUBLISHED)) {
+        if (event.getState().equals(EventState.PUBLISHED)) {
             throw new ConflictException("You cant upd published event");
         }
         if (updateEventUserRequest.getEventDate() != null) {
@@ -123,7 +123,7 @@ public class EventServiceImpl implements EventService {
             dateValidator(updateEventAdminRequest.getEventDate());
         }
 
-        if (event.getState().equals(PUBLISHED)) {
+        if (event.getState().equals(EventState.PUBLISHED)) {
             throw new ConflictException("You cant upd published event");
         }
 
@@ -150,10 +150,14 @@ public class EventServiceImpl implements EventService {
             Location location = getLocationToEvent(updateEventAdminRequest.getLocation());
             event.setLocation(location);
         }
-        if (updateEventAdminRequest.getStateAction() != null && event.getState().equals(PENDING)) {
+        if (updateEventAdminRequest.getStateAction() != null && event.getState().equals(EventState.PENDING)) {
             event.setState(toEventStateForUpd(updateEventAdminRequest.getStateAction()));
-        } else {
-            throw new ConflictException("Event has been canceled");
+        }
+        if (updateEventAdminRequest.getStateAction() != null) {
+            if (updateEventAdminRequest.getStateAction().equals(EventStateAction.PUBLISH_EVENT)
+                    && event.getState().equals(EventState.REJECTED)) {
+                throw new ConflictException("Event has been canceled");
+            }
         }
         return eventMapper.toEventFullDto(eventRepository.save(event));
     }
@@ -212,6 +216,9 @@ public class EventServiceImpl implements EventService {
         log.info("get event for public");
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found!"));
+        if (!event.getState().equals(EventState.PUBLISHED)) {
+            throw new NotFoundException("Event not published");
+        }
         //statsClient.catchHit(request.getRequestURI(), request.getRemoteAddr());
         return eventMapper.toEventFullDto(event);
     }
@@ -248,7 +255,7 @@ public class EventServiceImpl implements EventService {
                 eventsShortDto.sort(Comparator.comparing(EventShortDto::getEventDate));
             }
         }
-       // statsClient.catchHit(request.getRequestURI(), request.getRemoteAddr());
+//       statsClient.catchHit(request.getRequestURI(), request.getRemoteAddr());
         return eventsShortDto;
     }
 
@@ -302,7 +309,7 @@ public class EventServiceImpl implements EventService {
 
     private void dateValidator(LocalDateTime evDate) {
         if (evDate.isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new ConflictException("Остлалось менее двух часов до события!");
+            throw new BadRequestException("Остлалось менее двух часов до события!");
         }
     }
 
@@ -325,7 +332,7 @@ public class EventServiceImpl implements EventService {
             case REJECT_EVENT:
                 return EventState.REJECTED;
             case PUBLISH_EVENT:
-                return PUBLISHED;
+                return EventState.PUBLISHED;
             case CANCEL_REVIEW:
                 return EventState.CANCELED;
             case SEND_TO_REVIEW:

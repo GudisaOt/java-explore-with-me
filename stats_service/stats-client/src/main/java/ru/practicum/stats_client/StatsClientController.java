@@ -3,7 +3,7 @@ package ru.practicum.stats_client;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.stats_models.models.EndpointHit;
+import ru.practicum.stats_models.EndpointHit;
 
 import java.util.Map;
 import java.util.Set;

@@ -10,4 +10,6 @@ import java.util.List;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findAllByIdIn(List<Long> id, Pageable pageable);
+
+    User findFirstByName(String name);
 }

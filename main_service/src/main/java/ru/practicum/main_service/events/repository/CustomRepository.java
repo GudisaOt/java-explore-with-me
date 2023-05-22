@@ -3,6 +3,8 @@ package ru.practicum.main_service.events.repository;
 import org.springframework.stereotype.Repository;
 import ru.practicum.main_service.events.enums.EventState;
 import ru.practicum.main_service.events.models.Event;
+import ru.practicum.main_service.events.enums.EventState;
+import ru.practicum.main_service.events.models.Event;
 
 import java.time.LocalDateTime;
 import java.util.List;

@@ -4,10 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.main_service.compilation.service.CompilationService;
 import ru.practicum.main_service.compilation.dto.CompilationDto;
 import ru.practicum.main_service.compilation.dto.NewCompilationDto;
 import ru.practicum.main_service.compilation.dto.UpdateCompilationRequest;
-import ru.practicum.main_service.compilation.service.CompilationService;
 
 import javax.validation.Valid;
 

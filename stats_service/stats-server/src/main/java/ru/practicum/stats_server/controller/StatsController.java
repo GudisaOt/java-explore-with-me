@@ -3,10 +3,11 @@ package ru.practicum.stats_server.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.stats_models.models.EndpointHit;
-import ru.practicum.stats_models.models.ViewStats;
+import ru.practicum.stats_models.EndpointHit;
+import ru.practicum.stats_models.ViewStats;
 import ru.practicum.stats_server.model.Stats;
 import ru.practicum.stats_server.service.StatsService;
+
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;

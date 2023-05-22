@@ -1,9 +1,10 @@
 package ru.practicum.main_service.events.service;
 
 import org.springframework.data.domain.Pageable;
-import ru.practicum.main_service.events.dto.*;
 import ru.practicum.main_service.events.enums.EventState;
 import ru.practicum.main_service.events.enums.TypesForSort;
+import ru.practicum.main_service.events.dto.*;
+
 import ru.practicum.main_service.request.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.main_service.request.dto.EventRequestStatusUpdateResult;
 import ru.practicum.main_service.request.dto.ParticipationRequestDto;
