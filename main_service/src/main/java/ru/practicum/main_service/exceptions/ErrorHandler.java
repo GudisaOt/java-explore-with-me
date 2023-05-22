@@ -15,10 +15,10 @@ import java.time.LocalDateTime;
 public class ErrorHandler {
 
     @ExceptionHandler(PSQLException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public ErrorResponse dbException(PSQLException e) {
-        return new ErrorResponse(HttpStatus.CONFLICT,
+        return new ErrorResponse(HttpStatus.BAD_REQUEST,
                 "Bad request to DB",
                 e.getMessage(),
                 LocalDateTime.now());
