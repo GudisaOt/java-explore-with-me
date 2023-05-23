@@ -25,7 +25,7 @@ public class CompilationControllerPublic {
     @GetMapping
     public ResponseEntity<List<CompilationDto>> getAll(
             @RequestParam(required = false) Boolean pinned,
-            @PositiveOrZero @RequestParam(required = false, defaultValue = "0") Integer from,
+            @PositiveOrZero @RequestParam(required = false, defaultValue = "1") Integer from,
             @Positive @RequestParam(required = false, defaultValue = "10") Integer size) {
         return ResponseEntity.ok(compilationService.getAll(pinned, PageRequest.of(from / size, size)));
     }

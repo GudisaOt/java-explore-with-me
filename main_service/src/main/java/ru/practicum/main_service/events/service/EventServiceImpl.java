@@ -19,7 +19,6 @@ import ru.practicum.main_service.exceptions.BadRequestException;
 import ru.practicum.main_service.exceptions.ConflictException;
 import ru.practicum.main_service.events.enums.TypesForSort;
 import ru.practicum.main_service.exceptions.NotFoundException;
-import ru.practicum.stats_client.StatsClient;
 import ru.practicum.main_service.events.dto.*;
 import ru.practicum.main_service.request.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.main_service.request.dto.EventRequestStatusUpdateResult;
@@ -165,19 +164,6 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventFullDto> getEventsByAdmin(List<Long> users, List<EventState> states, List<Long> categories,
                                                LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size) {
-//        List<EventState> eventStates = states == null ? null : states
-//                .stream()
-//                .map(EventState::valueOf)
-//                .collect(Collectors.toList());
-//        return eventRepository.getEventsAdmin(users, eventStates, categories, PageRequest.of(from,size))
-//                .stream()
-//                .filter(event -> start != null ?
-//                        event.getEventDate().isAfter(LocalDateTime.parse(start, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))) :
-//                        event.getEventDate().isAfter(LocalDateTime.now())
-//                                && end != null ? event.getEventDate().isBefore(LocalDateTime.parse(end, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
-//                        : event.getEventDate().isBefore(LocalDateTime.MAX))
-//                .map(eventMapper::toEventFullDto)
-//                .collect(Collectors.toList());
         log.info("get event list by admin");
         List<EventFullDto> events = eventRepository.getEventsByAdmin(users, states, categories, rangeStart, rangeEnd, from, size)
                 .stream()

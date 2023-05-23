@@ -24,7 +24,7 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<List<UserDto>> getUsers(@RequestParam(required = false) List<Long> ids,
-                                                  @PositiveOrZero  @RequestParam(required = false, defaultValue = "0") Integer from,
+                                                  @PositiveOrZero  @RequestParam(required = false, defaultValue = "1") Integer from,
                                                   @Positive @RequestParam(required = false, defaultValue = "10") Integer size) {
         return ResponseEntity.ok(userService.getUserList(ids, PageRequest.of(from, size)));
     }
