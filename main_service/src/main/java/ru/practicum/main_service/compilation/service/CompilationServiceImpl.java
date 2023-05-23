@@ -69,7 +69,6 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Override
     public List<CompilationDto> getAll(Boolean pinned, Pageable pageable) {
-
         return compilationRepository.findAllByPinned(pinned, pageable)
                 .stream()
                 .map(this::mapToCompDto)

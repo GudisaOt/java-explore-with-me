@@ -68,7 +68,7 @@ public class CategoryServiceImpl implements CategoryService {
                 .orElseThrow(() -> new NotFoundException("Category not found!!!"));
 
         if (categoryRepository.findFirstByName(categoryDto.getName()) != null
-                && categoryRepository.findFirstByName(categoryDto.getName()).getId() != id) {
+                && !categoryRepository.findFirstByName(categoryDto.getName()).getId().equals(id)) {
             throw new ConflictException("Category already exist");
         }
 
