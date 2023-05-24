@@ -236,72 +236,72 @@ public class EventServiceImpl implements EventService {
                                                   Boolean onlyAvailable, TypesForSort sort, Integer from, Integer size, HttpServletRequest request) {
         log.info("get event LIST for public");
         PageRequest pageRequest = PageRequest.of(from / size, size);
-        List<EventShortDto> eventShortDtos = eventRepository.searchEvents(text, categories, paid, EventState.PUBLISHED.toString(), pageRequest)
-                .stream()
-                .filter(event -> rangeStart != null ?
-                        event.getEventDate().isAfter(rangeStart) :
-                                event.getEventDate().isAfter(LocalDateTime.now())
-                                        &&  rangeEnd != null ? event.getEventDate().isBefore(rangeEnd) :
-                                        event.getEventDate().isBefore(LocalDateTime.MAX))
-                .map(eventMapper::toEventShortDto)
-                .collect(Collectors.toList());
-        if (onlyAvailable) {
-            eventShortDtos = eventShortDtos
-                    .stream()
-                    .filter(eventShortDto -> eventShortDto.getConfirmedRequests() < eventRepository.findById(eventShortDto.getId()).get().getParticipantLimit()
-                    || eventRepository.findById(eventShortDto.getId()).get().getParticipantLimit() == 0)
-                    .collect(Collectors.toList());
-        }
-        if (sort != null) {
-
-                if (sort.equals(TypesForSort.VIEWS)) {
-                    eventShortDtos = eventShortDtos
-                            .stream()
-                            .sorted(Comparator.comparing(EventShortDto::getViews))
-                            .collect(Collectors.toList());
-            } else if (sort.equals(TypesForSort.EVENT_DATE)) {
-                    eventShortDtos = eventShortDtos
-                            .stream()
-                            .sorted(Comparator.comparing(EventShortDto::getEventDate))
-                            .collect(Collectors.toList());
-            }
-        }
-        statsClient.catchHit(request.getRequestURI(), request.getRemoteAddr());
-        return clientMainSrc.viewsForEventShortDtoList(eventShortDtos
-                .stream()
-                .collect(Collectors.toList()));
-
-
-//        List<Event> events = eventRepository.getEventsByPublic(text, categories, paid, rangeStart, rangeEnd, from, size);
-//
-//        if (events.isEmpty()) {
-//            return List.of();
-//        }
-//
-//        Map<Long, Integer> limit = new HashMap<>();
-//        events.forEach(event -> limit.put(event.getId(), event.getParticipantLimit()));
-//
-//        List<EventShortDto> eventsShortDto = events
+//        List<EventShortDto> eventShortDtos = eventRepository.searchEvents(text, categories, paid, EventState.PUBLISHED.toString(), pageRequest)
 //                .stream()
+//                .filter(event -> rangeStart != null ?
+//                        event.getEventDate().isAfter(rangeStart) :
+//                                event.getEventDate().isAfter(LocalDateTime.now())
+//                                        &&  rangeEnd != null ? event.getEventDate().isBefore(rangeEnd) :
+//                                        event.getEventDate().isBefore(LocalDateTime.MAX))
 //                .map(eventMapper::toEventShortDto)
 //                .collect(Collectors.toList());
-//
 //        if (onlyAvailable) {
-//            eventsShortDto = eventsShortDto
+//            eventShortDtos = eventShortDtos
 //                    .stream()
-//                    .filter(eventShort -> (limit.get(eventShort.getId()) == 0 ||
-//                            limit.get(eventShort.getId()) > eventShort.getConfirmedRequests()))
+//                    .filter(eventShortDto -> eventShortDto.getConfirmedRequests() < eventRepository.findById(eventShortDto.getId()).get().getParticipantLimit()
+//                    || eventRepository.findById(eventShortDto.getId()).get().getParticipantLimit() == 0)
 //                    .collect(Collectors.toList());
 //        }
 //        if (sort != null) {
-//            if (sort.equals(TypesForSort.VIEWS)) {
-//                eventsShortDto.sort(Comparator.comparing(EventShortDto::getViews));
+//
+//                if (sort.equals(TypesForSort.VIEWS)) {
+//                    eventShortDtos = eventShortDtos
+//                            .stream()
+//                            .sorted(Comparator.comparing(EventShortDto::getViews))
+//                            .collect(Collectors.toList());
 //            } else if (sort.equals(TypesForSort.EVENT_DATE)) {
-//                eventsShortDto.sort(Comparator.comparing(EventShortDto::getEventDate));
+//                    eventShortDtos = eventShortDtos
+//                            .stream()
+//                            .sorted(Comparator.comparing(EventShortDto::getEventDate))
+//                            .collect(Collectors.toList());
 //            }
 //        }
 //        statsClient.catchHit(request.getRequestURI(), request.getRemoteAddr());
-//        return clientMainSrc.viewsForEventShortDtoList(eventsShortDto);
+//        return clientMainSrc.viewsForEventShortDtoList(eventShortDtos
+//                .stream()
+//                .collect(Collectors.toList()));
+
+
+        List<Event> events = eventRepository.getEventsByPublic(text, categories, paid, rangeStart, rangeEnd, from, size);
+
+        if (events.isEmpty()) {
+            return List.of();
+        }
+
+        Map<Long, Integer> limit = new HashMap<>();
+        events.forEach(event -> limit.put(event.getId(), event.getParticipantLimit()));
+
+        List<EventShortDto> eventsShortDto = events
+                .stream()
+                .map(eventMapper::toEventShortDto)
+                .collect(Collectors.toList());
+
+        if (onlyAvailable) {
+            eventsShortDto = eventsShortDto
+                    .stream()
+                    .filter(eventShort -> (limit.get(eventShort.getId()) == 0 ||
+                            limit.get(eventShort.getId()) > eventShort.getConfirmedRequests()))
+                    .collect(Collectors.toList());
+        }
+        if (sort != null) {
+            if (sort.equals(TypesForSort.VIEWS)) {
+                eventsShortDto.sort(Comparator.comparing(EventShortDto::getViews));
+            } else if (sort.equals(TypesForSort.EVENT_DATE)) {
+                eventsShortDto.sort(Comparator.comparing(EventShortDto::getEventDate));
+            }
+        }
+        statsClient.catchHit(request.getRequestURI(), request.getRemoteAddr());
+        return clientMainSrc.viewsForEventShortDtoList(eventsShortDto);
     }
 
     @Override
