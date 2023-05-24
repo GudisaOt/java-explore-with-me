@@ -1,6 +1,7 @@
 package ru.practicum.stats_server.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.stats_models.EndpointHit;
@@ -35,7 +36,7 @@ public class StatsController {
     @PostMapping("/hit")
     public ResponseEntity<Stats> catchHit(@Valid @RequestBody EndpointHit endpointHit) {
 
-        return ResponseEntity.ok().body(statsService.catchHit(endpointHit));
+        return ResponseEntity.status(HttpStatus.CREATED).body(statsService.catchHit(endpointHit));
     }
 
 }

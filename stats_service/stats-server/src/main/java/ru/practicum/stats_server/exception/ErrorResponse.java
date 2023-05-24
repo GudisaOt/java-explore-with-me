@@ -1,11 +1,13 @@
 package ru.practicum.stats_server.exception;
 
+import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+@Data
 public class ErrorResponse {
     private final HttpStatus status;
     private final String message;

@@ -13,10 +13,10 @@ public class ErrorHandler {
     @ExceptionHandler(BadRequest.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public ErrorResponse badRequestHandle(BadRequest badRequest) {
+    public ErrorResponse badRequestException(BadRequest e) {
         return new ErrorResponse(HttpStatus.BAD_REQUEST,
-                "BAD REQUEST",
-                badRequest.getMessage(),
+                "Bad request!",
+                e.getMessage(),
                 LocalDateTime.now());
     }
 }
