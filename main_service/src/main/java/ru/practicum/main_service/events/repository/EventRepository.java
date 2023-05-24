@@ -25,7 +25,7 @@ public interface EventRepository extends JpaRepository<Event, Long>, CustomRepos
             "AND e.paid = :paid " +
             "AND e.state = :state", nativeQuery = true)
     Page<Event> searchEvents(String text, List<Long> categoryIds, Boolean paid, String state, Pageable pageable);
-//
+
     @Query(value = "SELECT e FROM events AS e " +
             "WHERE ((:users) IS NULL OR e.user_id IN (:users)) " +
             "AND ((:states) IS NULL OR e.state IN (:states)) " +

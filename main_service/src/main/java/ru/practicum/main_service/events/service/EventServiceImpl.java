@@ -169,7 +169,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventFullDto> getEventsByAdmin(List<Long> users, List<EventState> states, List<Long> categories,
                                                LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size) {
-        PageRequest pageRequest = PageRequest.of(from/size, size);
+        PageRequest pageRequest = PageRequest.of(from / size, size);
 //        List<EventState> stateList = states == null ? null : states
 //                .stream()
 //                .map(EventState::value)
@@ -194,7 +194,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventShortDto> getAllByUser(Long userId, Integer from, Integer size) {
         log.info("get event list by user");
-        PageRequest pageRequest = PageRequest.of(from/size, size);
+        PageRequest pageRequest = PageRequest.of(from / size, size);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found!"));
         List<Event> events = eventRepository.findEventsByInitiatorId(userId, pageRequest)
@@ -235,7 +235,7 @@ public class EventServiceImpl implements EventService {
     public List<EventShortDto> getEventsForPublic(String text, List<Long> categories, Boolean paid, LocalDateTime rangeStart, LocalDateTime rangeEnd,
                                                   Boolean onlyAvailable, TypesForSort sort, Integer from, Integer size, HttpServletRequest request) {
         log.info("get event LIST for public");
-        PageRequest pageRequest = PageRequest.of(from/size, size);
+        PageRequest pageRequest = PageRequest.of(from / size, size);
 //        List<EventShortDto> eventShortDtos = eventRepository.searchEvents(text, categories, paid, EventState.PUBLISHED, pageRequest)
 //                .stream()
 //                .filter(event -> rangeStart != null ?

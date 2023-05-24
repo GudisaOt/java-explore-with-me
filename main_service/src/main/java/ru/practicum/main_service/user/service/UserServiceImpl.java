@@ -2,7 +2,6 @@ package ru.practicum.main_service.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.main_service.exceptions.ConflictException;
@@ -49,7 +48,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> getUserList(List<Long> id, Integer from, Integer size) {
-        PageRequest pageRequest = PageRequest.of(from/size, size);
+        PageRequest pageRequest = PageRequest.of(from / size, size);
         if (id == null) {
             return userRepository.findAll(pageRequest)
                     .stream()
