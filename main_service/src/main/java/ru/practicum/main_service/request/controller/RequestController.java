@@ -22,9 +22,8 @@ public class RequestController {
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public ParticipationRequestDto createRequest(@PathVariable Long userId, @Positive @RequestParam Long eventId) {
-        return requestService.create(userId, eventId);
+    public ResponseEntity<ParticipationRequestDto> createRequest(@PathVariable Long userId, @Positive @RequestParam Long eventId) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(requestService.create(userId, eventId));
     }
 
     @PatchMapping("/{requestId}/cancel")

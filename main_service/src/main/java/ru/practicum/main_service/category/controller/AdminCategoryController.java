@@ -17,9 +17,8 @@ public class AdminCategoryController {
     private final CategoryService categoryService;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public CategoryDto create(@Valid @RequestBody NewCategoryDto newCategoryDto) {
-        return categoryService.create(newCategoryDto);
+    public ResponseEntity<CategoryDto> create(@Valid @RequestBody NewCategoryDto newCategoryDto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(categoryService.create(newCategoryDto));
     }
 
     @PatchMapping("/{catId}")

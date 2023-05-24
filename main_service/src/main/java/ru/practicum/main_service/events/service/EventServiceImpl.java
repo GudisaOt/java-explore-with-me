@@ -170,20 +170,6 @@ public class EventServiceImpl implements EventService {
     public List<EventFullDto> getEventsByAdmin(List<Long> users, List<EventState> states, List<Long> categories,
                                                LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size) {
         PageRequest pageRequest = PageRequest.of(from / size, size);
-//        List<EventState> stateList = states == null ? null : states
-//                .stream()
-//                .map(EventState::value)
-//                .collect(Collectors.toList());
-//        List<EventFullDto> eventFullDtos = eventRepository.searchEventsByAdmin(users, states, categories, pageRequest)
-//                .stream()
-//                .filter(event -> rangeStart != null ?
-//                        event.getEventDate().isAfter(rangeStart) :
-//                        event.getEventDate().isAfter(LocalDateTime.now())
-//                                && rangeEnd != null ? event.getEventDate().isBefore(rangeEnd)
-//                                : event.getEventDate().isBefore(LocalDateTime.MAX))
-//                .map(eventMapper::toEventFullDto)
-//                .collect(Collectors.toList());
-//        return clientMainSrc.viewsForEventFullDtoList(eventFullDtos);
         List<EventFullDto> events = eventRepository.getEventsByAdmin(users, states, categories, rangeStart, rangeEnd, from, size)
                 .stream()
                 .map(eventMapper::toEventFullDto)
@@ -236,42 +222,11 @@ public class EventServiceImpl implements EventService {
                                                   Boolean onlyAvailable, TypesForSort sort, Integer from, Integer size, HttpServletRequest request) {
         log.info("get event LIST for public");
         PageRequest pageRequest = PageRequest.of(from / size, size);
-//        List<EventShortDto> eventShortDtos = eventRepository.searchEvents(text, categories, paid, EventState.PUBLISHED.toString(), pageRequest)
-//                .stream()
-//                .filter(event -> rangeStart != null ?
-//                        event.getEventDate().isAfter(rangeStart) :
-//                                event.getEventDate().isAfter(LocalDateTime.now())
-//                                        &&  rangeEnd != null ? event.getEventDate().isBefore(rangeEnd) :
-//                                        event.getEventDate().isBefore(LocalDateTime.MAX))
-//                .map(eventMapper::toEventShortDto)
-//                .collect(Collectors.toList());
-//        if (onlyAvailable) {
-//            eventShortDtos = eventShortDtos
-//                    .stream()
-//                    .filter(eventShortDto -> eventShortDto.getConfirmedRequests() < eventRepository.findById(eventShortDto.getId()).get().getParticipantLimit()
-//                    || eventRepository.findById(eventShortDto.getId()).get().getParticipantLimit() == 0)
-//                    .collect(Collectors.toList());
-//        }
-//        if (sort != null) {
-//
-//                if (sort.equals(TypesForSort.VIEWS)) {
-//                    eventShortDtos = eventShortDtos
-//                            .stream()
-//                            .sorted(Comparator.comparing(EventShortDto::getViews))
-//                            .collect(Collectors.toList());
-//            } else if (sort.equals(TypesForSort.EVENT_DATE)) {
-//                    eventShortDtos = eventShortDtos
-//                            .stream()
-//                            .sorted(Comparator.comparing(EventShortDto::getEventDate))
-//                            .collect(Collectors.toList());
-//            }
-//        }
-//        statsClient.catchHit(request.getRequestURI(), request.getRemoteAddr());
-//        return clientMainSrc.viewsForEventShortDtoList(eventShortDtos
-//                .stream()
-//                .collect(Collectors.toList()));
-
-
+        if (rangeEnd != null && rangeStart != null) {
+            if (rangeEnd.isBefore(rangeStart)) {
+                throw new BadRequestException("End is before start!!!");
+            }
+        }
         List<Event> events = eventRepository.getEventsByPublic(text, categories, paid, rangeStart, rangeEnd, from, size);
 
         if (events.isEmpty()) {
@@ -331,24 +286,6 @@ public class EventServiceImpl implements EventService {
         if (requestsList.isEmpty()) {
             throw new ConflictException("Request list is empty");
         }
-
-//        if (!event.getInitiator().getId().equals(userId)) {
-//            throw new BadRequestException("You are not initiator!");
-//        }
-//        if (event.getParticipantLimit() == 0 || event.getParticipantLimit() == event.getConfirmedRequests()) {
-//            throw new BadRequestException("Limit equals 0 or full");
-//        }
-//        EventRequestStatusUpdateResult result = new EventRequestStatusUpdateResult();
-//        List<Request> requestsList = requestRepository.findAllByIdInAndStatus(request.getRequestIds(), RequestStatus.PENDING);
-//
-//        if (request.getStatus().equals(RequestStatus.REJECTED)) {
-//            rejectedList.addAll(changeStatusInList(requestsList, RequestStatus.REJECTED));
-//        }
-//
-//        if (request.getStatus().equals(RequestStatus.CONFIRMED)) {
-//            long space = event.getParticipantLimit() - event.getConfirmedRequests();
-//            long count = 0L;
-//        }
         return prepare(requestsList, request.getStatus(), event);
     }
 

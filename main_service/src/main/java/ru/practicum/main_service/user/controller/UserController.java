@@ -29,9 +29,8 @@ public class UserController {
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public UserDto create(@Valid @RequestBody NewUserRequest newUserRequest) {
-        return userService.createUser(newUserRequest);
+    public ResponseEntity<UserDto> create(@Valid @RequestBody NewUserRequest newUserRequest) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(newUserRequest));
     }
 
     @DeleteMapping("/{userId}")

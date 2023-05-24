@@ -18,9 +18,8 @@ public class CompilationControllerAdmin {
     private final CompilationService compilationService;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public CompilationDto create(@Valid @RequestBody NewCompilationDto newCompilationDto) {
-        return compilationService.create(newCompilationDto);
+    public ResponseEntity<CompilationDto> create(@Valid @RequestBody NewCompilationDto newCompilationDto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(compilationService.create(newCompilationDto));
     }
 
     @PatchMapping("/{compId}")

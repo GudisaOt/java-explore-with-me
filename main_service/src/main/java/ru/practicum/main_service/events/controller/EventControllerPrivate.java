@@ -32,22 +32,18 @@ public class EventControllerPrivate {
     public ResponseEntity<List<EventShortDto>> getAllEvents(@PathVariable Long userId,
                                                             @PositiveOrZero @RequestParam(value = "from", defaultValue = "0") Integer from,
                                                             @Positive @RequestParam(value = "size", defaultValue = "10") Integer size) {
-        log.info("PRIVATE CONTROLLER get all");
         return ResponseEntity.ok(eventService.getAllByUser(userId, from, size));
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public EventFullDto create(@PathVariable Long userId,
+    public ResponseEntity<EventFullDto> create(@PathVariable Long userId,
                                                @Valid @RequestBody NewEventDto newEventDto) {
-        log.info("PRIVATE CONTROLLER create");
-        return eventService.create(userId,newEventDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.create(userId,newEventDto));
     }
 
     @GetMapping("/{eventId}")
     public ResponseEntity<EventFullDto> getEvent(@PathVariable Long userId,
                                                  @PathVariable Long eventId) {
-        log.info("PRIVATE CONTROLLER get event");
         return ResponseEntity.ok(eventService.getFullEventByUser(userId, eventId));
     }
 
@@ -55,24 +51,21 @@ public class EventControllerPrivate {
     public ResponseEntity<EventFullDto> patch(@PathVariable Long userId,
                                               @PathVariable Long eventId,
                                               @RequestBody UpdateEventUserRequest updateEventUserRequest) {
-        log.info("PRIVATE CONTROLLER patch");
         return ResponseEntity.ok(eventService.update(userId, eventId, updateEventUserRequest));
     }
 
     @GetMapping("/{eventId}/requests")
-    @ResponseStatus(HttpStatus.OK)
-    public List<ParticipationRequestDto> getRequestsOnEventByUser(
+    public ResponseEntity<List<ParticipationRequestDto>> getRequestsOnEventByUser(
             @Positive @PathVariable Long userId,
             @Positive @PathVariable Long eventId) {
-        return eventService.getRequestsOnEventPrivate(userId, eventId);
+        return ResponseEntity.ok(eventService.getRequestsOnEventPrivate(userId, eventId));
     }
 
     @PatchMapping("/{eventId}/requests")
-    @ResponseStatus(HttpStatus.OK)
-    public EventRequestStatusUpdateResult processWithEventsRequests(
+    public ResponseEntity<EventRequestStatusUpdateResult> processWithEventsRequests(
             @Valid @RequestBody EventRequestStatusUpdateRequest requests,
             @Positive @PathVariable Long userId,
             @Positive @PathVariable Long eventId) {
-        return eventService.patchEventRequestPrivate(userId, eventId, requests);
+        return ResponseEntity.ok(eventService.patchEventRequestPrivate(userId, eventId, requests));
     }
 }
