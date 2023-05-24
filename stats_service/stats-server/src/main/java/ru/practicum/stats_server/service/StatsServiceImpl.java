@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.stats_models.EndpointHit;
 import ru.practicum.stats_models.ViewStats;
+import ru.practicum.stats_server.exception.BadRequest;
 import ru.practicum.stats_server.model.Stats;
 import ru.practicum.stats_server.model.StatsMapper;
 import ru.practicum.stats_server.repository.StatsRepository;
@@ -30,6 +31,9 @@ public class StatsServiceImpl implements StatsService {
 
     @Override
     public List<ViewStats> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
+        if (start.isAfter(end)) {
+            throw new BadRequest("Date incorrect");
+        }
         if (uris == null || uris.isEmpty()) {
             if (unique) {
                 return statsRepository.findAllStatsUriDist(start, end);
