@@ -2,7 +2,6 @@ package ru.practicum.main_service.events.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -31,10 +30,10 @@ public class EventControllerPrivate {
 
     @GetMapping
     public ResponseEntity<List<EventShortDto>> getAllEvents(@PathVariable Long userId,
-                                                            @PositiveOrZero @RequestParam(required = false, defaultValue = "0") Integer from,
-                                                            @Positive @RequestParam(required = false, defaultValue = "10") Integer size) {
+                                                            @PositiveOrZero @RequestParam(value = "from", defaultValue = "0") Integer from,
+                                                            @Positive @RequestParam(value = "size", defaultValue = "10") Integer size) {
         log.info("PRIVATE CONTROLLER get all");
-        return ResponseEntity.ok(eventService.getAllByUser(userId, PageRequest.of(from / size, size)));
+        return ResponseEntity.ok(eventService.getAllByUser(userId, from, size));
     }
 
     @PostMapping

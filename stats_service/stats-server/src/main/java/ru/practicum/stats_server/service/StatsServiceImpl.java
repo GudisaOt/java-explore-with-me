@@ -11,7 +11,6 @@ import ru.practicum.stats_server.repository.StatsRepository;
 
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 
@@ -22,12 +21,11 @@ public class StatsServiceImpl implements StatsService {
 
     private final StatsMapper statsMapper;
 
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Override
     @Transactional
     public Stats catchHit(EndpointHit hit) {
-        return statsRepository.save(statsMapper.toStats(hit, LocalDateTime.parse(hit.getTimestamp(), formatter)));
+        return statsRepository.save(statsMapper.toStats(hit, hit.getTimestamp()));
     }
 
     @Override

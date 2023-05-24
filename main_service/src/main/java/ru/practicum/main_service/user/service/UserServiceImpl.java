@@ -1,6 +1,7 @@
 package ru.practicum.main_service.user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,24 +43,30 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteById(Long id) {
+        getById(id);
         userRepository.deleteById(id);
     }
 
     @Override
-    public List<UserDto> getUserList(List<Long> id, Pageable pageable) {
+    public List<UserDto> getUserList(List<Long> id, Integer from, Integer size) {
+        PageRequest pageRequest = PageRequest.of(from/size, size);
         if (id == null) {
-            return userRepository.findAll(pageable)
+            return userRepository.findAll(pageRequest)
                     .stream()
                     .map(userMapper::toUserDto)
                     .collect(Collectors.toList());
         }
         if (id.size() > 0) {
-            return userRepository.findAllByIdIn(id, pageable)
+            List<UserDto> i = userRepository.getAll(id, pageRequest)
+                    .stream()
+                    .map(userMapper::toUserDto)
+                    .collect(Collectors.toList());
+            return userRepository.getAll(id, pageRequest)
                     .stream()
                     .map(userMapper::toUserDto)
                     .collect(Collectors.toList());
         } else {
-            return userRepository.findAll(pageable)
+            return userRepository.findAll(pageRequest)
                     .stream()
                     .map(userMapper::toUserDto)
                     .collect(Collectors.toList());

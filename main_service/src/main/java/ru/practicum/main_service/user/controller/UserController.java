@@ -1,7 +1,6 @@
 package ru.practicum.main_service.user.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -26,7 +25,7 @@ public class UserController {
     public ResponseEntity<List<UserDto>> getUsers(@RequestParam(required = false) List<Long> ids,
                                                   @PositiveOrZero  @RequestParam(required = false, defaultValue = "1") Integer from,
                                                   @Positive @RequestParam(required = false, defaultValue = "10") Integer size) {
-        return ResponseEntity.ok(userService.getUserList(ids, PageRequest.of(from, size)));
+        return ResponseEntity.ok(userService.getUserList(ids, from, size));
     }
 
     @PostMapping

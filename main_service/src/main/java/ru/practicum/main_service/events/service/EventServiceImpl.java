@@ -2,11 +2,14 @@ package ru.practicum.main_service.events.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Pageable;
+
+import org.springframework.data.domain.PageRequest;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.main_service.category.model.Category;
 import ru.practicum.main_service.category.repository.CategoryRepository;
+import ru.practicum.main_service.client.StatClientMainSrc;
 import ru.practicum.main_service.events.enums.EventState;
 import ru.practicum.main_service.events.enums.EventStateAction;
 import ru.practicum.main_service.events.mapper.EventMapper;
@@ -29,6 +32,7 @@ import ru.practicum.main_service.request.repository.RequestRepository;
 import ru.practicum.main_service.request.enums.RequestStatus;
 import ru.practicum.main_service.user.model.User;
 import ru.practicum.main_service.user.repository.UserRepository;
+import ru.practicum.stats_client.StatsClient;
 
 
 import javax.servlet.http.HttpServletRequest;
@@ -49,7 +53,8 @@ public class EventServiceImpl implements EventService {
     private final RequestRepository requestRepository;
     private final RequestMapper requestMapper;
 
-    //private final StatsClient statsClient;
+    private final StatClientMainSrc clientMainSrc;
+    private final StatsClient statsClient;
 
     @Override
     @Transactional
@@ -164,23 +169,40 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventFullDto> getEventsByAdmin(List<Long> users, List<EventState> states, List<Long> categories,
                                                LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size) {
-        log.info("get event list by admin");
+        PageRequest pageRequest = PageRequest.of(from/size, size);
+//        List<EventState> stateList = states == null ? null : states
+//                .stream()
+//                .map(EventState::value)
+//                .collect(Collectors.toList());
+//        List<EventFullDto> eventFullDtos = eventRepository.searchEventsByAdmin(users, states, categories, pageRequest)
+//                .stream()
+//                .filter(event -> rangeStart != null ?
+//                        event.getEventDate().isAfter(rangeStart) :
+//                        event.getEventDate().isAfter(LocalDateTime.now())
+//                                && rangeEnd != null ? event.getEventDate().isBefore(rangeEnd)
+//                                : event.getEventDate().isBefore(LocalDateTime.MAX))
+//                .map(eventMapper::toEventFullDto)
+//                .collect(Collectors.toList());
+//        return clientMainSrc.viewsForEventFullDtoList(eventFullDtos);
         List<EventFullDto> events = eventRepository.getEventsByAdmin(users, states, categories, rangeStart, rangeEnd, from, size)
                 .stream()
                 .map(eventMapper::toEventFullDto)
                 .collect(Collectors.toList());
-        return events;
+        return clientMainSrc.viewsForEventFullDtoList(events);
     }
 
     @Override
-    public List<EventShortDto> getAllByUser(Long userId, Pageable pageable) {
+    public List<EventShortDto> getAllByUser(Long userId, Integer from, Integer size) {
         log.info("get event list by user");
+        PageRequest pageRequest = PageRequest.of(from/size, size);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found!"));
-        return eventRepository.findAllByInitiatorId(userId)
+        List<Event> events = eventRepository.findEventsByInitiatorId(userId, pageRequest)
+                .getContent().stream().collect(Collectors.toList());
+        return clientMainSrc.viewsForEventShortDtoList(events
                 .stream()
                 .map(eventMapper::toEventShortDto)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
     }
 
     @Override
@@ -194,7 +216,7 @@ public class EventServiceImpl implements EventService {
             throw new BadRequestException("You are not initiator!");
         }
 
-        return eventMapper.toEventFullDto(event);
+        return clientMainSrc.viewsForEventFullDto(eventMapper.toEventFullDto(event));
     }
 
     @Override
@@ -205,14 +227,51 @@ public class EventServiceImpl implements EventService {
         if (!event.getState().equals(EventState.PUBLISHED)) {
             throw new NotFoundException("Event not published");
         }
-        //statsClient.catchHit(request.getRequestURI(), request.getRemoteAddr());
-        return eventMapper.toEventFullDto(event);
+            statsClient.catchHit(request.getRequestURI(), request.getRemoteAddr());
+            return clientMainSrc.viewsForEventFullDto(eventMapper.toEventFullDto(event));
     }
 
     @Override
     public List<EventShortDto> getEventsForPublic(String text, List<Long> categories, Boolean paid, LocalDateTime rangeStart, LocalDateTime rangeEnd,
                                                   Boolean onlyAvailable, TypesForSort sort, Integer from, Integer size, HttpServletRequest request) {
         log.info("get event LIST for public");
+        PageRequest pageRequest = PageRequest.of(from/size, size);
+//        List<EventShortDto> eventShortDtos = eventRepository.searchEvents(text, categories, paid, EventState.PUBLISHED, pageRequest)
+//                .stream()
+//                .filter(event -> rangeStart != null ?
+//                        event.getEventDate().isAfter(rangeStart) :
+//                                event.getEventDate().isAfter(LocalDateTime.now())
+//                                        &&  rangeEnd != null ? event.getEventDate().isBefore(rangeEnd) :
+//                                        event.getEventDate().isBefore(LocalDateTime.MAX))
+//                .map(eventMapper::toEventShortDto)
+//                .collect(Collectors.toList());
+//        if (onlyAvailable) {
+//            eventShortDtos = eventShortDtos
+//                    .stream()
+//                    .filter(eventShortDto -> eventShortDto.getConfirmedRequests() < eventRepository.findById(eventShortDto.getId()).get().getParticipantLimit()
+//                    || eventRepository.findById(eventShortDto.getId()).get().getParticipantLimit() == 0)
+//                    .collect(Collectors.toList());
+//        }
+//        if (sort != null) {
+//
+//                if (sort.equals(TypesForSort.VIEWS)) {
+//                    eventShortDtos = eventShortDtos
+//                            .stream()
+//                            .sorted(Comparator.comparing(EventShortDto::getViews))
+//                            .collect(Collectors.toList());
+//            } else if (sort.equals(TypesForSort.EVENT_DATE)) {
+//                    eventShortDtos = eventShortDtos
+//                            .stream()
+//                            .sorted(Comparator.comparing(EventShortDto::getEventDate))
+//                            .collect(Collectors.toList());
+//            }
+//        }
+//        statsClient.catchHit(request.getRequestURI(), request.getRemoteAddr());
+//        return clientMainSrc.viewsForEventShortDtoList(eventShortDtos
+//                .stream()
+//                .collect(Collectors.toList()));
+
+
         List<Event> events = eventRepository.getEventsByPublic(text, categories, paid, rangeStart, rangeEnd, from, size);
 
         if (events.isEmpty()) {
@@ -241,8 +300,8 @@ public class EventServiceImpl implements EventService {
                 eventsShortDto.sort(Comparator.comparing(EventShortDto::getEventDate));
             }
         }
-//       statsClient.catchHit(request.getRequestURI(), request.getRemoteAddr());
-        return eventsShortDto;
+        statsClient.catchHit(request.getRequestURI(), request.getRemoteAddr());
+        return clientMainSrc.viewsForEventShortDtoList(eventsShortDto);
     }
 
     @Override

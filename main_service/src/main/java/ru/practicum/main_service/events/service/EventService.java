@@ -1,6 +1,5 @@
 package ru.practicum.main_service.events.service;
 
-import org.springframework.data.domain.Pageable;
 import ru.practicum.main_service.events.enums.EventState;
 import ru.practicum.main_service.events.enums.TypesForSort;
 import ru.practicum.main_service.events.dto.*;
@@ -25,7 +24,7 @@ public interface EventService {
 
 
 
-    List<EventShortDto> getAllByUser(Long userId, Pageable pageable);
+    List<EventShortDto> getAllByUser(Long userId, Integer from, Integer size);
 
     EventFullDto getFullEventByUser(Long userId, Long eventId);
 

@@ -38,6 +38,7 @@ public class Event {
     private int participantLimit;
 
     @Column(name = "confirmed_requests", nullable = false)
+    @Builder.Default
     private Long confirmedRequests = 0L;
 
     @ManyToOne

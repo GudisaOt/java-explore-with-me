@@ -41,9 +41,9 @@ public class RequestServiceImpl implements RequestService {
     public ParticipationRequestDto create(Long userId, Long evId) {
         log.info("create request");
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found!!!"));
+                .orElseThrow(() -> new ConflictException("User not found!!!"));
         Event event = eventRepository.findById(evId)
-                .orElseThrow(() -> new NotFoundException("Event not found!!!"));
+                .orElseThrow(() -> new ConflictException("Event not found!!!"));
 
         if (event.getInitiator().getEmail().equals(user.getEmail())) {
             throw new ConflictException("Initiator cant create a request!");

@@ -6,5 +6,4 @@ public enum EventState {
     REJECTED,
     PENDING;
 
-
 }
