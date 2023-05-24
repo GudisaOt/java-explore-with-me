@@ -60,11 +60,16 @@ public class RequestServiceImpl implements RequestService {
             throw new ConflictException("Request already exists");
         }
 
+        RequestStatus status = RequestStatus.CONFIRMED;
+        if (event.getRequestModeration() && event.getParticipantLimit() > 0) {
+            status = RequestStatus.PENDING;
+        }
+
         Request request = Request.builder()
                 .requester(user)
                 .event(event)
                 .created(LocalDateTime.now())
-                .status((event.getRequestModeration()) ? RequestStatus.PENDING : RequestStatus.CONFIRMED)
+                .status(status)
                 .build();
         if (!event.getRequestModeration()) {
             event.setConfirmedRequests(event.getConfirmedRequests() + 1L);

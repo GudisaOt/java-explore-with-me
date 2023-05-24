@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS events
     confirmed_requests BIGINT DEFAULT 0,
     views  BIGINT,
     state VARCHAR(20) DEFAULT 'PENDING',
-    title VARCHAR(120) NOT NULL,
+    title VARCHAR(120) NOT NULL CHECK (LENGTH(title) > 2),
     category_id BIGINT REFERENCES categories (id),
     user_id BIGINT REFERENCES users (id) ON DELETE CASCADE,
     location_id BIGINT REFERENCES locations (id)
