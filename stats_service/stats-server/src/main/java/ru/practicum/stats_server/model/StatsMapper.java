@@ -2,7 +2,7 @@ package ru.practicum.stats_server.model;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import ru.practicum.stats_models.models.EndpointHit;
+import ru.practicum.stats_models.EndpointHit;
 
 import java.time.LocalDateTime;
 
@@ -10,4 +10,6 @@ import java.time.LocalDateTime;
 public interface StatsMapper {
     @Mapping(target = "timestamp", expression = "java(timestamp)")
     Stats toStats(EndpointHit hit, LocalDateTime timestamp);
+
+    StatsDto toStatsDto(Stats stats);
 }

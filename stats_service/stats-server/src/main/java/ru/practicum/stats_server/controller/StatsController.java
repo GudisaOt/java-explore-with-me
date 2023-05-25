@@ -1,12 +1,14 @@
 package ru.practicum.stats_server.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.stats_models.models.EndpointHit;
-import ru.practicum.stats_models.models.ViewStats;
-import ru.practicum.stats_server.model.Stats;
+import ru.practicum.stats_models.EndpointHit;
+import ru.practicum.stats_models.ViewStats;
+import ru.practicum.stats_server.model.StatsDto;
 import ru.practicum.stats_server.service.StatsService;
+
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
@@ -32,9 +34,9 @@ public class StatsController {
     }
 
     @PostMapping("/hit")
-    public ResponseEntity<Stats> catchHit(@Valid @RequestBody EndpointHit endpointHit) {
+    public ResponseEntity<StatsDto> catchHit(@Valid @RequestBody EndpointHit endpointHit) {
 
-        return ResponseEntity.ok().body(statsService.catchHit(endpointHit));
+        return ResponseEntity.status(HttpStatus.CREATED).body(statsService.catchHit(endpointHit));
     }
 
 }

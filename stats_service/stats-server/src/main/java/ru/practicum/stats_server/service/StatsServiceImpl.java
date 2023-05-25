@@ -3,14 +3,15 @@ package ru.practicum.stats_server.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.stats_models.models.EndpointHit;
-import ru.practicum.stats_models.models.ViewStats;
-import ru.practicum.stats_server.model.Stats;
+import ru.practicum.stats_models.EndpointHit;
+import ru.practicum.stats_models.ViewStats;
+import ru.practicum.stats_server.exception.BadRequest;
+import ru.practicum.stats_server.model.StatsDto;
 import ru.practicum.stats_server.model.StatsMapper;
 import ru.practicum.stats_server.repository.StatsRepository;
 
+
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 
@@ -18,18 +19,21 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StatsServiceImpl implements StatsService {
     private final StatsRepository statsRepository;
+
     private final StatsMapper statsMapper;
 
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Override
     @Transactional
-    public Stats catchHit(EndpointHit hit) {
-        return statsRepository.save(statsMapper.toStats(hit, LocalDateTime.parse(hit.getTimestamp(), formatter)));
+    public StatsDto catchHit(EndpointHit hit) {
+        return statsMapper.toStatsDto(statsRepository.save(statsMapper.toStats(hit, hit.getTimestamp())));
     }
 
     @Override
     public List<ViewStats> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
+        if (end.isBefore(start)) {
+            throw new BadRequest("Date is incorrect");
+        }
         if (uris == null || uris.isEmpty()) {
             if (unique) {
                 return statsRepository.findAllStatsUriDist(start, end);

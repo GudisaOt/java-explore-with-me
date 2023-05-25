@@ -36,16 +36,18 @@ services:
     #restart: on-failure
     ports:
       - "8080:8080"
+      - "8081:8082"
     depends_on:
       - ewm-db
       - stats-server
     environment:
-      - STATS_SERVER_URL=http://stats-server:9090
+      - STATS_SERVER=http://stats-server:9090
       - DB_NAME=ewm
       - DB_HOST=ewm-db
       - DB_PORT=5432
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=iamroot
+      - JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8082
 
   ewm-db:
     image: postgres:14-alpine
