@@ -6,13 +6,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import ru.practicum.main_service.events.models.Event;
 
-import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long>, CustomRepository {
-    List<Event> findAllByInitiatorId(Long userId);
 
     Page<Event> findEventsByInitiatorId(Long userId, PageRequest pageRequest);
 
-    Event findFirstByCategoryId(Long catId);
+    Optional<Event> findFirstByCategoryId(Long catId);
 }

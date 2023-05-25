@@ -9,10 +9,10 @@ import org.springframework.stereotype.Repository;
 import ru.practicum.main_service.user.model.User;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-    List<User> findAllByIdIn(List<Long> id, Pageable pageable);
 
     @Query(value = "SELECT * " +
             "FROM users AS u " +
@@ -20,5 +20,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "ORDER BY u.id DESC ", nativeQuery = true)
     Page<User> getAll(List<Long> ids, PageRequest request);
 
-    User findFirstByName(String name);
+    Optional<User> findFirstByName(String name);
 }

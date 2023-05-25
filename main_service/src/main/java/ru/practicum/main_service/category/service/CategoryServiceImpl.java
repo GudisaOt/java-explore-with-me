@@ -30,7 +30,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public CategoryDto create(NewCategoryDto newCategoryDto) {
-        if (categoryRepository.findFirstByName(newCategoryDto.getName()) != null) {
+        if (categoryRepository.findFirstByName(newCategoryDto.getName()).isPresent()) {
             throw new ConflictException("Category already exist");
         }
         return categoryMapper.categoryToCategoryDto(categoryRepository
@@ -44,17 +44,11 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Category getCategoryById(Long id) {
-        return categoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Category not found!!!"));
-    }
-
-    @Override
     @Transactional
     public void delete(Long id) {
         categoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Category not found!!!"));
-        if (eventRepository.findFirstByCategoryId(id) != null) {
+        if (eventRepository.findFirstByCategoryId(id).isPresent()) {
             throw new ConflictException("you cant delete a category in use");
         }
 
@@ -67,8 +61,8 @@ public class CategoryServiceImpl implements CategoryService {
         Category catToUpd = categoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Category not found!!!"));
 
-        if (categoryRepository.findFirstByName(categoryDto.getName()) != null
-                && !categoryRepository.findFirstByName(categoryDto.getName()).getId().equals(id)) {
+        if (categoryRepository.findFirstByName(categoryDto.getName()).isPresent()
+                && !categoryRepository.findFirstByName(categoryDto.getName()).get().getId().equals(id)) {
             throw new ConflictException("Category already exist");
         }
 

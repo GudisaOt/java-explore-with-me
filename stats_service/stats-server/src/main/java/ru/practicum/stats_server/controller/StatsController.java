@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.stats_models.EndpointHit;
 import ru.practicum.stats_models.ViewStats;
-import ru.practicum.stats_server.model.Stats;
+import ru.practicum.stats_server.model.StatsDto;
 import ru.practicum.stats_server.service.StatsService;
 
 
@@ -34,7 +34,7 @@ public class StatsController {
     }
 
     @PostMapping("/hit")
-    public ResponseEntity<Stats> catchHit(@Valid @RequestBody EndpointHit endpointHit) {
+    public ResponseEntity<StatsDto> catchHit(@Valid @RequestBody EndpointHit endpointHit) {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(statsService.catchHit(endpointHit));
     }

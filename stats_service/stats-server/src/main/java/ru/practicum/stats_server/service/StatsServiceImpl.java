@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.stats_models.EndpointHit;
 import ru.practicum.stats_models.ViewStats;
 import ru.practicum.stats_server.exception.BadRequest;
-import ru.practicum.stats_server.model.Stats;
+import ru.practicum.stats_server.model.StatsDto;
 import ru.practicum.stats_server.model.StatsMapper;
 import ru.practicum.stats_server.repository.StatsRepository;
 
@@ -25,8 +25,8 @@ public class StatsServiceImpl implements StatsService {
 
     @Override
     @Transactional
-    public Stats catchHit(EndpointHit hit) {
-        return statsRepository.save(statsMapper.toStats(hit, hit.getTimestamp()));
+    public StatsDto catchHit(EndpointHit hit) {
+        return statsMapper.toStatsDto(statsRepository.save(statsMapper.toStats(hit, hit.getTimestamp())));
     }
 
     @Override

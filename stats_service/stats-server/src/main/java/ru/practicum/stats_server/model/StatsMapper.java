@@ -10,4 +10,6 @@ import java.time.LocalDateTime;
 public interface StatsMapper {
     @Mapping(target = "timestamp", expression = "java(timestamp)")
     Stats toStats(EndpointHit hit, LocalDateTime timestamp);
+
+    StatsDto toStatsDto(Stats stats);
 }

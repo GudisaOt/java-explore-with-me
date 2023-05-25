@@ -9,7 +9,6 @@ import ru.practicum.main_service.exceptions.NotFoundException;
 import ru.practicum.main_service.user.dto.NewUserRequest;
 import ru.practicum.main_service.user.dto.UserDto;
 import ru.practicum.main_service.user.mapper.UserMapper;
-import ru.practicum.main_service.user.model.User;
 import ru.practicum.main_service.user.repository.UserRepository;
 
 import java.util.List;
@@ -27,7 +26,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDto createUser(NewUserRequest newUserRequest) {
         if (newUserRequest.getName() != null) {
-            if (userRepository.findFirstByName(newUserRequest.getName()) != null) {
+            if (userRepository.findFirstByName(newUserRequest.getName()).isPresent()) {
                 throw new ConflictException("Username already exist!!!");
             }
         }
@@ -36,8 +35,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getById(Long id) {
-        return userRepository.findById(id).orElseThrow(() -> new NotFoundException("User not found!!!"));
+    public UserDto getById(Long id) {
+        return userMapper.toUserDto(userRepository.findById(id).orElseThrow(() -> new NotFoundException("User not found!!!")));
     }
 
     @Override
