@@ -20,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/events")
 @Slf4j
-public class EventControllerPublic {
+public class PublicEventController {
     private final EventService eventService;
 
     @GetMapping

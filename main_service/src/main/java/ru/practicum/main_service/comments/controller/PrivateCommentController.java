@@ -15,7 +15,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/users/{userId}/comments")
-public class CommentControllerPrivate {
+public class PrivateCommentController {
     private final CommentService commentService;
 
     @PostMapping

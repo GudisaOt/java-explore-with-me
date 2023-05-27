@@ -11,7 +11,7 @@ import ru.practicum.main_service.comments.service.CommentService;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/admin/comments")
-public class CommentControllerAdmin {
+public class AdminCommentController {
     private final CommentService commentService;
 
     @DeleteMapping
