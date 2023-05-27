@@ -6,10 +6,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.main_service.category.dto.CategoryDto;
+import ru.practicum.main_service.comments.dto.CommentDto;
 import ru.practicum.main_service.events.enums.EventState;
 import ru.practicum.main_service.user.dto.UserShortDto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -50,4 +52,6 @@ public class EventFullDto {
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", shape = JsonFormat.Shape.STRING)
     private LocalDateTime publishedOn;
+
+    private List<CommentDto> comments;
 }
