@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.main_service.category.model.Category;
 import ru.practicum.main_service.category.repository.CategoryRepository;
 import ru.practicum.main_service.client.StatClientMainSrc;
+import ru.practicum.main_service.comments.mapper.CommentMapper;
+import ru.practicum.main_service.comments.repository.CommentRepository;
 import ru.practicum.main_service.events.enums.EventState;
 import ru.practicum.main_service.events.enums.EventStateAction;
 import ru.practicum.main_service.events.mapper.EventMapper;
@@ -55,12 +57,13 @@ public class EventServiceImpl implements EventService {
 
     private final StatClientMainSrc clientMainSrc;
     private final StatsClient statsClient;
+    private final CommentRepository commentRepository;
+    private final CommentMapper commentMapper;
 
     @Override
     @Transactional
     public EventFullDto create(Long userId, NewEventDto newEventDto) {
         dateValidator(newEventDto.getEventDate());
-        log.info("creating event");
         User eventOwner = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found!"));
         Category category = categoryRepository.findById(newEventDto.getCategory())
@@ -72,7 +75,6 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto update(Long userId, Long eventId, UpdateEventUserRequest updateEventUserRequest) {
-        log.info("upd by user");
         User eventOwner = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found!"));
         Event event = eventRepository.findById(eventId)
@@ -193,7 +195,6 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto getFullEventByUser(Long userId, Long eventId) {
-        log.info("get event by user");
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found!"));
         Event event = eventRepository.findById(eventId)
@@ -202,25 +203,41 @@ public class EventServiceImpl implements EventService {
             throw new BadRequestException("You are not initiator!");
         }
 
-        return clientMainSrc.viewsForEventFullDto(eventMapper.toEventFullDto(event));
+        EventFullDto eventFullDto = eventMapper.toEventFullDto(event);
+        if (commentRepository.findAllByEventId(eventId) != null) {
+            eventFullDto.setComments(commentRepository.findAllByEventId(eventId)
+                    .stream()
+                    .map(commentMapper::toCommentDto)
+                    .collect(Collectors.toList()));
+        } else {
+            eventFullDto.setComments(null);
+        }
+        return clientMainSrc.viewsForEventFullDto(eventFullDto);
     }
 
     @Override
     public EventFullDto getEventForPublic(Long eventId, HttpServletRequest request) {
-        log.info("get event for public");
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found!"));
         if (!event.getState().equals(EventState.PUBLISHED)) {
             throw new NotFoundException("Event not published");
         }
+        EventFullDto eventFullDto = eventMapper.toEventFullDto(event);
+        if (commentRepository.findAllByEventId(eventId) != null) {
+            eventFullDto.setComments(commentRepository.findAllByEventId(eventId)
+                    .stream()
+                    .map(commentMapper::toCommentDto)
+                    .collect(Collectors.toList()));
+        } else {
+            eventFullDto.setComments(null);
+        }
             statsClient.catchHit(request.getRequestURI(), request.getRemoteAddr());
-            return clientMainSrc.viewsForEventFullDto(eventMapper.toEventFullDto(event));
+            return clientMainSrc.viewsForEventFullDto(eventFullDto);
     }
 
     @Override
     public List<EventShortDto> getEventsForPublic(String text, List<Long> categories, Boolean paid, LocalDateTime rangeStart, LocalDateTime rangeEnd,
                                                   Boolean onlyAvailable, TypesForSort sort, Integer from, Integer size, HttpServletRequest request) {
-        log.info("get event LIST for public");
         PageRequest pageRequest = PageRequest.of(from / size, size);
         if (rangeEnd != null && rangeStart != null) {
             if (rangeEnd.isBefore(rangeStart)) {

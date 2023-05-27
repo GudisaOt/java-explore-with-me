@@ -25,7 +25,7 @@ import java.util.List;
 @RequestMapping("/users/{userId}/events")
 @Slf4j
 @Validated
-public class EventControllerPrivate {
+public class PrivateEventController {
     private final EventService eventService;
 
     @GetMapping
